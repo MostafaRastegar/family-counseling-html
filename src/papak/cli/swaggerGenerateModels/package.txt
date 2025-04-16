@@ -1,0 +1,29 @@
+{
+  "name": "swagger-to-typescript-generator",
+  "version": "1.0.0",
+  "description": "Generates TypeScript interfaces and services from Swagger/OpenAPI YAML specs",
+  "main": "generateModels.js",
+  "scripts": {
+    "start": "node generateModels.js",
+    "generate": "node generate.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "swagger",
+    "openapi",
+    "yaml",
+    "typescript",
+    "generator",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "change-case": "^4.1.2",
+    "fs-extra": "^11.3.0",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
