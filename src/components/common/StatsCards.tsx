@@ -1,245 +1,391 @@
 'use client';
 
-import React, { ReactNode } from 'react';
-import { ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
-import { Card, Col, Row, Space, Statistic, Typography } from 'antd';
-import { StatisticProps } from 'antd/es/statistic/Statistic';
+import { ReactNode } from 'react';
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  InfoCircleOutlined,
+} from '@ant-design/icons';
+import {
+  Card,
+  Col,
+  Progress,
+  Row,
+  Space,
+  Statistic,
+  Tooltip,
+  Typography,
+} from 'antd';
 
-const { Text, Title } = Typography;
+const { Title, Text } = Typography;
 
-export interface StatCardItem {
-  key: string;
+export type StatItem = {
+  /**
+   * Title or label for the stat
+   */
   title: string;
-  value: number | string;
+  /**
+   * The main value to display
+   */
+  value: string | number;
+  /**
+   * Icon to display with the stat
+   */
   icon?: ReactNode;
-  iconBackground?: string;
+  /**
+   * Accent color for the stat
+   */
   color?: string;
-  prefix?: ReactNode;
-  suffix?: ReactNode;
+  /**
+   * Prefix before the value
+   */
+  prefix?: ReactNode | string;
+  /**
+   * Suffix after the value
+   */
+  suffix?: ReactNode | string;
+  /**
+   * Percentage change indicator
+   */
+  change?: number;
+  /**
+   * Additional description text
+   */
+  description?: string;
+  /**
+   * Precision for the value (number of decimal places)
+   */
   precision?: number;
-  loading?: boolean;
-  trend?: {
-    value: number;
-    type: 'increase' | 'decrease';
-    text?: string;
-  };
-  description?: string | ReactNode;
-  footer?: ReactNode;
+  /**
+   * Format function for the value
+   */
+  formatter?: (value: number | string) => ReactNode;
+  /**
+   * Optional secondary value
+   */
+  secondaryValue?: string | number;
+  /**
+   * Optional secondary label
+   */
+  secondaryLabel?: string;
+  /**
+   * Progress percentage (0-100)
+   */
+  progress?: number;
+  /**
+   * Link to navigate to when clicked
+   */
+  link?: string;
+  /**
+   * Click handler
+   */
   onClick?: () => void;
-}
+  /**
+   * Loading state
+   */
+  loading?: boolean;
+  /**
+   * Custom render function for the content
+   */
+  render?: (stat: StatItem) => ReactNode;
+};
 
-export interface StatsCardsProps {
-  stats: StatCardItem[];
-  gutter?: number | [number, number];
+export type StatsCardsProps = {
+  /**
+   * Array of stat items to display
+   */
+  stats: StatItem[];
+  /**
+   * Optional title for the entire stats group
+   */
   title?: string | ReactNode;
-  subtitle?: string | ReactNode;
-  cardSpan?: {
+  /**
+   * Optional description for the entire stats group
+   */
+  description?: string | ReactNode;
+  /**
+   * Number of cards per row on different screen sizes
+   */
+  cols?: {
     xs?: number;
     sm?: number;
     md?: number;
     lg?: number;
     xl?: number;
-    xxl?: number;
   };
-  className?: string;
+  /**
+   * Loading state for all cards
+   */
   loading?: boolean;
-  cardClassName?: string;
-  cardBodyStyle?: React.CSSProperties;
-  groupCard?: boolean;
-  hoverable?: boolean;
-}
+  /**
+   * Additional class names
+   */
+  className?: string;
+  /**
+   * Card size
+   */
+  size?: 'default' | 'small';
+  /**
+   * Whether to use a card wrapper for the entire component
+   */
+  withCard?: boolean;
+  /**
+   * Optional custom header
+   */
+  header?: ReactNode;
+  /**
+   * Optional custom footer
+   */
+  footer?: ReactNode;
+  /**
+   * Spacing between cards
+   */
+  gutter?: number | [number, number];
+  /**
+   * Layout type: 'grid' or 'inline'
+   */
+  layout?: 'grid' | 'inline';
+  /**
+   * Card border: true for bordered cards, false for borderless
+   */
+  bordered?: boolean;
+};
 
 /**
- * StatsCards - A reusable component for displaying statistics in cards
- *
- * This component provides a flexible grid of statistic cards that can be used
- * in dashboards and overview pages.
+ * A flexible component for displaying statistics and metrics in cards
  */
 const StatsCards: React.FC<StatsCardsProps> = ({
   stats,
-  gutter = [16, 16],
   title,
-  subtitle,
-  cardSpan = {
+  description,
+  cols = {
     xs: 24,
     sm: 12,
     md: 8,
     lg: 6,
     xl: 6,
-    xxl: 6,
   },
-  className = '',
   loading = false,
-  cardClassName = '',
-  cardBodyStyle,
-  groupCard = false,
-  hoverable = false,
+  className = '',
+  size = 'default',
+  withCard = true,
+  header,
+  footer,
+  gutter = [16, 16],
+  layout = 'grid',
+  bordered = true,
 }) => {
+  // Calculate column spans for different screen sizes
+  const getColSpans = () => {
+    return {
+      xs: cols.xs || 24,
+      sm: cols.sm || 12,
+      md: cols.md || 8,
+      lg: cols.lg || 6,
+      xl: cols.xl || 6,
+    };
+  };
+
   // Render a single stat card
-  const renderStatCard = (stat: StatCardItem, index: number) => {
-    const valueStyle: React.CSSProperties = {
-      color: stat.color,
-    };
+  const renderStatCard = (stat: StatItem, index: number) => {
+    // Handle change indicator (up/down arrow and color)
+    const renderChange = () => {
+      if (stat.change === undefined) return null;
 
-    // Statistic props
-    const statisticProps: StatisticProps = {
-      title: stat.title,
-      value: stat.value,
-      precision: stat.precision,
-      prefix: stat.prefix,
-      suffix: stat.suffix,
-      loading: loading || stat.loading,
-      valueStyle,
-    };
+      const isPositive = stat.change > 0;
+      const changeIcon = isPositive ? (
+        <ArrowUpOutlined />
+      ) : (
+        <ArrowDownOutlined />
+      );
+      const changeColor = isPositive ? '#52c41a' : '#f5222d';
 
-    // Trend indicator if provided
-    const trendIndicator = stat.trend ? (
-      <div className="mt-1 flex items-center">
-        {stat.trend.type === 'increase' ? (
-          <ArrowUpOutlined style={{ color: '#52c41a' }} />
-        ) : (
-          <ArrowDownOutlined style={{ color: '#ff4d4f' }} />
-        )}
-        <Text
-          className="mx-1"
-          style={{
-            color: stat.trend.type === 'increase' ? '#52c41a' : '#ff4d4f',
-          }}
-        >
-          {stat.trend.value}%
+      return (
+        <Text style={{ color: changeColor }} className="ml-2">
+          {changeIcon} {Math.abs(stat.change)}%
         </Text>
-        {stat.trend.text && <Text type="secondary">{stat.trend.text}</Text>}
-      </div>
-    ) : null;
+      );
+    };
 
-    // Individual card
+    // Main card content
     const cardContent = (
-      <div className="stat-card-content">
-        <div className="flex items-start justify-between">
-          {stat.icon && (
-            <div
-              className="stat-card-icon flex size-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: stat.iconBackground || '#f0f5ff' }}
-            >
-              {stat.icon}
+      <>
+        {/* If a custom render function is provided, use it */}
+        {stat.render ? (
+          stat.render(stat)
+        ) : (
+          <>
+            <div className="mb-2 flex items-center justify-between">
+              <Text className="text-gray-600">{stat.title}</Text>
+              {stat.description && (
+                <Tooltip title={stat.description}>
+                  <InfoCircleOutlined className="text-gray-400" />
+                </Tooltip>
+              )}
             </div>
-          )}
-          <Statistic {...statisticProps} />
-        </div>
 
-        {(stat.description || trendIndicator) && (
-          <div className="stat-card-description mt-2">
-            {typeof stat.description === 'string' ? (
-              <Text type="secondary">{stat.description}</Text>
-            ) : (
-              stat.description
+            <div className="mb-2 flex items-baseline">
+              <Statistic
+                value={stat.value}
+                precision={stat.precision || 0}
+                valueStyle={{
+                  color: stat.color || 'inherit',
+                  fontSize: size === 'small' ? '1.5rem' : '2rem',
+                  fontWeight: 'bold',
+                }}
+                prefix={stat.prefix}
+                suffix={stat.suffix}
+                formatter={stat.formatter}
+                loading={loading || stat.loading}
+              />
+              {renderChange()}
+            </div>
+
+            {stat.secondaryValue !== undefined && (
+              <div className="flex items-center text-sm text-gray-500">
+                <span>{stat.secondaryLabel || 'Total'}:</span>
+                <Text strong className="ml-1">
+                  {stat.secondaryValue}
+                </Text>
+              </div>
             )}
-            {trendIndicator}
-          </div>
-        )}
 
-        {stat.footer && (
-          <div className="stat-card-footer mt-2 border-t border-gray-200 pt-2">
-            {stat.footer}
-          </div>
+            {stat.progress !== undefined && (
+              <Progress
+                percent={stat.progress}
+                size="small"
+                status="active"
+                strokeColor={stat.color}
+                className="mt-2"
+              />
+            )}
+
+            {stat.icon && (
+              <div
+                className="absolute right-4 top-4 rounded-full p-2"
+                style={{
+                  background: `${stat.color}20`,
+                  color: stat.color || 'inherit',
+                }}
+              >
+                {stat.icon}
+              </div>
+            )}
+          </>
         )}
-      </div>
+      </>
     );
 
-    // If using individual cards for each stat
-    if (!groupCard) {
-      return (
-        <Col
-          key={stat.key || index}
-          xs={cardSpan.xs}
-          sm={cardSpan.sm}
-          md={cardSpan.md}
-          lg={cardSpan.lg}
-          xl={cardSpan.xl}
-          xxl={cardSpan.xxl}
-        >
-          <Card
-            className={`stat-card ${cardClassName}`}
-            bodyStyle={cardBodyStyle}
-            hoverable={hoverable || !!stat.onClick}
-            onClick={stat.onClick}
-          >
-            {cardContent}
-          </Card>
-        </Col>
-      );
-    }
-
-    // If using a grouped card approach
+    // Card component with hover effects if clickable
     return (
-      <Col
-        key={stat.key || index}
-        xs={cardSpan.xs}
-        sm={cardSpan.sm}
-        md={cardSpan.md}
-        lg={cardSpan.lg}
-        xl={cardSpan.xl}
-        xxl={cardSpan.xxl}
-      >
-        <div className={`stat-item ${cardClassName} h-full p-4`}>
+      <Col key={index} {...getColSpans()}>
+        <Card
+          bordered={bordered}
+          className={`h-full ${stat.onClick || stat.link ? 'cursor-pointer hover:shadow-md' : ''}`}
+          onClick={stat.onClick}
+          size={size}
+          loading={loading || stat.loading}
+          style={{
+            borderTop: stat.color ? `3px solid ${stat.color}` : undefined,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
           {cardContent}
-        </div>
+        </Card>
       </Col>
     );
   };
 
-  // If using a grouped card approach
-  if (groupCard) {
+  // For inline layout, we don't use the grid system
+  const renderInlineStats = () => {
     return (
-      <div className={`stats-cards ${className}`}>
-        {(title || subtitle) && (
-          <div className="stats-cards-header mb-4">
-            {title &&
-              (typeof title === 'string' ? (
-                <Title level={5}>{title}</Title>
-              ) : (
-                title
-              ))}
-            {subtitle &&
-              (typeof subtitle === 'string' ? (
-                <Text type="secondary">{subtitle}</Text>
-              ) : (
-                subtitle
-              ))}
+      <div className="flex flex-wrap">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className="mb-4 mr-4 inline-block"
+            style={{ minWidth: '200px' }}
+          >
+            <Card
+              bordered={bordered}
+              className={`h-full ${stat.onClick || stat.link ? 'cursor-pointer hover:shadow-md' : ''}`}
+              onClick={stat.onClick}
+              size="small"
+              loading={loading || stat.loading}
+              style={{
+                borderLeft: stat.color ? `3px solid ${stat.color}` : undefined,
+                position: 'relative',
+              }}
+            >
+              <Space align="center">
+                {stat.icon && (
+                  <div
+                    className="rounded-full p-2"
+                    style={{
+                      background: `${stat.color}20`,
+                      color: stat.color || 'inherit',
+                    }}
+                  >
+                    {stat.icon}
+                  </div>
+                )}
+                <div>
+                  <div className="text-xs text-gray-500">{stat.title}</div>
+                  <div
+                    className="text-lg font-bold"
+                    style={{ color: stat.color }}
+                  >
+                    {stat.prefix}
+                    {stat.value}
+                    {stat.suffix}
+                  </div>
+                </div>
+              </Space>
+            </Card>
           </div>
-        )}
-
-        <Card bodyStyle={{ padding: 0 }}>
-          <Row gutter={gutter} className="p-4">
-            {stats.map(renderStatCard)}
-          </Row>
-        </Card>
+        ))}
       </div>
     );
-  }
+  };
 
-  // Default individual cards approach
-  return (
-    <div className={`stats-cards ${className}`}>
-      {(title || subtitle) && (
-        <div className="stats-cards-header mb-4">
-          {title &&
-            (typeof title === 'string' ? (
-              <Title level={5}>{title}</Title>
-            ) : (
-              title
-            ))}
-          {subtitle &&
-            (typeof subtitle === 'string' ? (
-              <Text type="secondary">{subtitle}</Text>
-            ) : (
-              subtitle
-            ))}
+  // Main component content
+  const content = (
+    <>
+      {(title || header) && (
+        <div className="mb-4">
+          {header || (
+            <>
+              {typeof title === 'string' ? (
+                <Title level={4}>{title}</Title>
+              ) : (
+                title
+              )}
+              {description && (
+                <div className="text-gray-500">{description}</div>
+              )}
+            </>
+          )}
         </div>
       )}
 
-      <Row gutter={gutter}>{stats.map(renderStatCard)}</Row>
-    </div>
+      {layout === 'grid' ? (
+        <Row gutter={gutter}>
+          {stats.map((stat, index) => renderStatCard(stat, index))}
+        </Row>
+      ) : (
+        renderInlineStats()
+      )}
+
+      {footer && <div className="mt-4">{footer}</div>}
+    </>
+  );
+
+  // Wrap in card if requested
+  return withCard ? (
+    <Card className={className}>{content}</Card>
+  ) : (
+    <div className={className}>{content}</div>
   );
 };
 

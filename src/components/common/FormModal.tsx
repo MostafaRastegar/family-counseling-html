@@ -1,171 +1,333 @@
 'use client';
 
-import React, { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
-  Alert,
   Button,
   Divider,
   Form,
-  FormProps,
+  FormInstance,
   Modal,
   Space,
   Typography,
 } from 'antd';
-import { FormInstance } from 'antd/lib/form';
+import FormBuilder, { FormField, FormSection } from './FormBuilder';
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 
-export interface FormModalProps {
+export type FormModalProps = {
+  /**
+   * Title of the modal
+   */
   title: string;
+  /**
+   * Subtitle or description
+   */
+  description?: ReactNode;
+  /**
+   * Whether the modal is visible
+   */
   visible: boolean;
+  /**
+   * Called when the modal is closed
+   */
   onCancel: () => void;
-  onFinish: (values: any) => void | Promise<void>;
-  form: FormInstance;
-  width?: number | string;
-  confirmLoading?: boolean;
-  confirmText?: string;
+  /**
+   * Called when the form is submitted
+   */
+  onSubmit: (values: any) => void;
+  /**
+   * Submit button text
+   */
+  submitText?: string;
+  /**
+   * Cancel button text
+   */
   cancelText?: string;
-  footer?: ReactNode | null;
-  formProps?: FormProps;
-  children: ReactNode;
-  destroyOnClose?: boolean;
-  afterClose?: () => void;
-  className?: string;
+  /**
+   * Form fields
+   */
+  fields?: FormField[];
+  /**
+   * Form sections
+   */
+  sections?: FormSection[];
+  /**
+   * Initial values for the form
+   */
+  initialValues?: Record<string, any>;
+  /**
+   * Whether the form is submitting
+   */
+  loading?: boolean;
+  /**
+   * Width of the modal
+   */
+  width?: number | string;
+  /**
+   * Whether to center the modal vertically
+   */
   centered?: boolean;
+  /**
+   * Whether the modal can be closed by clicking the mask
+   */
   maskClosable?: boolean;
-  resetOnClose?: boolean;
-  confirmButtonProps?: {
-    type?: 'primary' | 'default' | 'dashed' | 'link' | 'text';
-    danger?: boolean;
-    disabled?: boolean;
-    icon?: ReactNode;
-    className?: string;
+  /**
+   * Whether to destroy the modal when it is closed
+   */
+  destroyOnClose?: boolean;
+  /**
+   * Form layout
+   */
+  layout?: 'horizontal' | 'vertical' | 'inline';
+  /**
+   * External form instance
+   */
+  form?: FormInstance;
+  /**
+   * Additional footer content
+   */
+  footer?: ReactNode;
+  /**
+   * Confirmation message before closing with unsaved changes
+   */
+  confirmCloseMessage?: string;
+  /**
+   * Whether to show a confirmation when closing with unsaved changes
+   */
+  confirmClose?: boolean;
+  /**
+   * Whether to disable the submit button when form is pristine
+   */
+  disableSubmitWhenPristine?: boolean;
+  /**
+   * Extra content to display before the form
+   */
+  beforeForm?: ReactNode;
+  /**
+   * Extra content to display after the form
+   */
+  afterForm?: ReactNode;
+  /**
+   * Extra buttons to display in the modal footer
+   */
+  extraButtons?: ReactNode;
+  /**
+   * Class name for the modal
+   */
+  className?: string;
+  /**
+   * Class name for the form
+   */
+  formClassName?: string;
+  /**
+   * Custom render function for the form
+   */
+  renderForm?: (formInstance: FormInstance) => ReactNode;
+  /**
+   * Custom render function for the modal footer
+   */
+  renderFooter?: (formInstance: FormInstance) => ReactNode;
+  /**
+   * Called when the form field values change
+   */
+  onValuesChange?: (changedValues: any, allValues: any) => void;
+  /**
+   * Whether to show a divider between the form and the footer
+   */
+  showFooterDivider?: boolean;
+  /**
+   * Form columns layout
+   */
+  columns?: {
+    xs?: number;
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
   };
-  alerts?: {
-    type: 'success' | 'info' | 'warning' | 'error';
-    message: string;
-    description?: string;
-    showIcon?: boolean;
-  }[];
-  headerExtra?: ReactNode;
-  description?: string;
-}
+};
 
 /**
- * FormModal - A reusable modal component with form functionality
- *
- * This component provides a configurable interface for displaying modals
- * with forms and handling form submission.
+ * A reusable modal with a form inside
  */
 const FormModal: React.FC<FormModalProps> = ({
   title,
+  description,
   visible,
   onCancel,
-  onFinish,
-  form,
+  onSubmit,
+  submitText = 'Submit',
+  cancelText = 'Cancel',
+  fields,
+  sections,
+  initialValues = {},
+  loading = false,
   width = 600,
-  confirmLoading = false,
-  confirmText = 'ذخیره',
-  cancelText = 'انصراف',
-  footer,
-  formProps,
-  children,
-  destroyOnClose = true,
-  afterClose,
-  className = '',
   centered = true,
   maskClosable = false,
-  resetOnClose = true,
-  confirmButtonProps = {
-    type: 'primary',
-  },
-  alerts = [],
-  headerExtra,
-  description,
+  destroyOnClose = true,
+  layout = 'vertical',
+  form: externalForm,
+  footer,
+  confirmCloseMessage = 'You have unsaved changes. Are you sure you want to close this form?',
+  confirmClose = true,
+  disableSubmitWhenPristine = false,
+  beforeForm,
+  afterForm,
+  extraButtons,
+  className = '',
+  formClassName = '',
+  renderForm,
+  renderFooter,
+  onValuesChange,
+  showFooterDivider = true,
+  columns,
 }) => {
-  // Reset form when modal is closed
-  useEffect(() => {
-    if (!visible && resetOnClose) {
-      form.resetFields();
-    }
-  }, [visible, form, resetOnClose]);
+  // Create form instance if not provided externally
+  const [form] = Form.useForm(externalForm);
+  const [formChanged, setFormChanged] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
-  // Handle form submission
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      await onFinish(values);
-    } catch (error) {
-      console.error('Form validation failed:', error);
+  // Reset the form when the modal becomes visible
+  useEffect(() => {
+    if (visible) {
+      form.resetFields();
+      form.setFieldsValue(initialValues);
+      setFormChanged(false);
+    }
+  }, [visible, form, initialValues]);
+
+  // Handle form values change to detect if the form is dirty
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    setFormChanged(true);
+    if (onValuesChange) {
+      onValuesChange(changedValues, allValues);
     }
   };
 
-  // Default footer with cancel and submit buttons
-  const defaultFooter = (
-    <div className="flex justify-end">
-      <Space>
-        <Button onClick={onCancel}>{cancelText}</Button>
-        <Button
-          {...confirmButtonProps}
-          loading={confirmLoading}
-          onClick={handleSubmit}
-        >
-          {confirmText}
-        </Button>
-      </Space>
-    </div>
-  );
+  // Handle form submission
+  const handleSubmit = (values: any) => {
+    onSubmit(values);
+  };
+
+  // Handle modal cancel with confirmation if needed
+  const handleCancel = () => {
+    if (confirmClose && formChanged) {
+      setConfirmVisible(true);
+    } else {
+      onCancel();
+    }
+  };
+
+  // Handle confirmation dialog
+  const handleConfirmCancel = () => {
+    setConfirmVisible(false);
+  };
+
+  const handleConfirmOk = () => {
+    setConfirmVisible(false);
+    onCancel();
+  };
+
+  // Render the form or custom content
+  const renderFormContent = () => {
+    if (renderForm) {
+      return renderForm(form);
+    }
+
+    return (
+      <FormBuilder
+        form={form}
+        fields={fields}
+        sections={sections}
+        initialValues={initialValues}
+        onFinish={handleSubmit}
+        onValuesChange={handleValuesChange}
+        layout={layout}
+        showSubmitButton={false}
+        showCancelButton={false}
+        withCard={false}
+        className={formClassName}
+        columns={columns}
+      />
+    );
+  };
+
+  // Render custom footer or default buttons
+  const renderModalFooter = () => {
+    if (renderFooter) {
+      return renderFooter(form);
+    }
+
+    if (footer) {
+      return footer;
+    }
+
+    return (
+      <div className="modal-footer">
+        <Space>
+          <Button onClick={handleCancel}>{cancelText}</Button>
+          {extraButtons}
+          <Button
+            type="primary"
+            onClick={() => form.submit()}
+            loading={loading}
+            disabled={disableSubmitWhenPristine && !formChanged}
+          >
+            {submitText}
+          </Button>
+        </Space>
+      </div>
+    );
+  };
 
   return (
-    <Modal
-      title={
-        <div>
-          <div className="flex items-center justify-between">
-            <span>{title}</span>
-            {headerExtra && <div>{headerExtra}</div>}
-          </div>
-          {description && (
-            <Text type="secondary" className="mt-1 block text-sm">
-              {description}
-            </Text>
-          )}
-        </div>
-      }
-      open={visible}
-      onCancel={onCancel}
-      footer={footer === undefined ? defaultFooter : footer}
-      width={width}
-      destroyOnClose={destroyOnClose}
-      afterClose={afterClose}
-      className={`form-modal ${className}`}
-      centered={centered}
-      maskClosable={maskClosable}
-    >
-      {alerts.length > 0 && (
-        <div className="mb-4">
-          {alerts.map((alert, index) => (
-            <Alert
-              key={index}
-              type={alert.type}
-              message={alert.message}
-              description={alert.description}
-              showIcon={alert.showIcon ?? true}
-              className="mb-2"
-            />
-          ))}
-        </div>
-      )}
-
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        {...formProps}
-        autoComplete="off"
+    <>
+      <Modal
+        title={
+          <>
+            <div className="modal-title">
+              {typeof title === 'string' ? (
+                <Title level={4}>{title}</Title>
+              ) : (
+                title
+              )}
+              {description && <Text type="secondary">{description}</Text>}
+            </div>
+          </>
+        }
+        open={visible}
+        onCancel={handleCancel}
+        footer={null}
+        width={width}
+        centered={centered}
+        maskClosable={maskClosable}
+        destroyOnClose={destroyOnClose}
+        className={className}
       >
-        {children}
-      </Form>
-    </Modal>
+        {beforeForm}
+
+        {renderFormContent()}
+
+        {afterForm}
+
+        {showFooterDivider && <Divider />}
+
+        {renderModalFooter()}
+      </Modal>
+
+      {/* Confirmation modal */}
+      <Modal
+        title="Confirm"
+        open={confirmVisible}
+        onCancel={handleConfirmCancel}
+        onOk={handleConfirmOk}
+        okText="Yes, close"
+        cancelText="No, keep editing"
+      >
+        <p>{confirmCloseMessage}</p>
+      </Modal>
+    </>
   );
 };
 
