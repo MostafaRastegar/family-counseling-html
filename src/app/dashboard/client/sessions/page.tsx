@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   CalendarOutlined,
   CloseCircleOutlined,
@@ -15,7 +16,6 @@ import {
   Divider,
   Empty,
   Form,
-  Input,
   Modal,
   Rate,
   Space,
@@ -23,13 +23,13 @@ import {
   Typography,
   message,
 } from 'antd';
+import FormModal from '@/components/common/FormModal';
 import SessionCard from '@/components/sessions/SessionCard';
-import SessionStatusBadge from '@/components/sessions/SessionStatusBadge';
 import SessionsList from '@/components/sessions/SessionsList';
+import SessionStatusBadge from '@/components/sessions/SessionStatusBadge';
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
-const { TextArea } = Input;
 
 // داده‌های نمونه برای جلسات
 const mockSessions = [
@@ -201,6 +201,47 @@ export default function ClientSessions() {
     setReviewModalVisible(true);
   };
 
+  // تعریف فیلدهای فرم لغو جلسه
+  const cancelFields = [
+    {
+      name: 'reason',
+      label: 'دلیل لغو جلسه',
+      type: 'textarea',
+      required: true,
+      placeholder: 'لطفاً دلیل لغو جلسه را وارد کنید',
+      rows: 4,
+    },
+  ];
+
+  // تعریف فیلدهای فرم ثبت نظر
+  const reviewFields = [
+    {
+      name: 'rating',
+      label: 'امتیاز شما به این جلسه',
+      type: 'custom',
+      required: true,
+      render: ({ field, form }) => (
+        <Rate 
+          value={form.getFieldValue('rating')}
+          onChange={(value) => form.setFieldValue('rating', value)}
+        />
+      ),
+    },
+    {
+      name: 'comment',
+      label: 'نظر شما',
+      type: 'textarea',
+      required: true,
+      placeholder: 'تجربه خود از این جلسه مشاوره را بنویسید',
+      rows: 4,
+    },
+    {
+      name: 'anonymous',
+      type: 'checkbox',
+      text: 'نظر من به صورت ناشناس ثبت شود',
+    },
+  ];
+
   return (
     <div className="container mx-auto">
       <Title level={2}>جلسات مشاوره من</Title>
@@ -356,167 +397,4 @@ export default function ClientSessions() {
                 <Text>{selectedSession.date}</Text>
 
                 <Text strong>زمان:</Text>
-                <Text>{selectedSession.time}</Text>
-
-                <Text strong>مدت:</Text>
-                <Text>{selectedSession.duration} دقیقه</Text>
-
-                <Text strong>پلتفرم ارتباطی:</Text>
-                <Text>
-                  {selectedSession.messengerType === 'telegram'
-                    ? 'تلگرام'
-                    : selectedSession.messengerType === 'whatsapp'
-                      ? 'واتس‌اپ'
-                      : selectedSession.messengerType}
-                </Text>
-              </div>
-            </Card>
-
-            {selectedSession.notes && (
-              <div className="mb-4">
-                <Text strong>یادداشت جلسه:</Text>
-                <Paragraph>{selectedSession.notes}</Paragraph>
-              </div>
-            )}
-
-            {selectedSession.status === 'completed' &&
-              !selectedSession.hasReview && (
-                <Button
-                  type="primary"
-                  icon={<StarOutlined />}
-                  onClick={() => {
-                    setDetailModalVisible(false);
-                    handleReviewSession(selectedSession);
-                  }}
-                >
-                  ثبت نظر
-                </Button>
-              )}
-
-            {selectedSession.status === 'confirmed' && (
-              <div className="mt-4">
-                <Alert
-                  message="اطلاعات ارتباطی"
-                  description={
-                    <Text>
-                      در زمان مقرر، جلسه از طریق{' '}
-                      {selectedSession.messengerType === 'telegram'
-                        ? 'تلگرام'
-                        : selectedSession.messengerType === 'whatsapp'
-                          ? 'واتس‌اپ'
-                          : selectedSession.messengerType}{' '}
-                      و با شناسه {selectedSession.messengerId} برگزار خواهد شد.
-                    </Text>
-                  }
-                  type="info"
-                  showIcon
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </Modal>
-
-      {/* مودال لغو جلسه */}
-      <Modal
-        title="لغو جلسه مشاوره"
-        open={cancelModalVisible}
-        onCancel={() => setCancelModalVisible(false)}
-        footer={null}
-      >
-        <Form form={cancelForm} layout="vertical" onFinish={handleCancelSubmit}>
-          <div className="mb-4">
-            <Text>در حال لغو جلسه با {selectedSession?.consultantName}</Text>
-            <br />
-            <Text>
-              تاریخ: {selectedSession?.date} - ساعت: {selectedSession?.time}
-            </Text>
-          </div>
-
-          <Alert
-            message="توجه"
-            description="لغو جلسه کمتر از 24 ساعت قبل از زمان شروع، ممکن است مشمول جریمه شود."
-            type="warning"
-            showIcon
-            className="mb-4"
-          />
-
-          <Form.Item
-            name="reason"
-            label="دلیل لغو جلسه"
-            rules={[
-              { required: true, message: 'لطفاً دلیل لغو جلسه را وارد کنید' },
-            ]}
-          >
-            <TextArea rows={4} placeholder="لطفاً دلیل لغو جلسه را وارد کنید" />
-          </Form.Item>
-
-          <Form.Item className="mb-0 text-left">
-            <Space>
-              <Button onClick={() => setCancelModalVisible(false)}>
-                انصراف
-              </Button>
-              <Button type="primary" danger htmlType="submit">
-                لغو جلسه
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* مودال ثبت نظر */}
-      <Modal
-        title="ثبت نظر برای جلسه مشاوره"
-        open={reviewModalVisible}
-        onCancel={() => setReviewModalVisible(false)}
-        footer={null}
-      >
-        <Form form={reviewForm} layout="vertical" onFinish={handleReviewSubmit}>
-          <div className="mb-4">
-            <Text>ثبت نظر برای جلسه با {selectedSession?.consultantName}</Text>
-            <br />
-            <Text>
-              تاریخ: {selectedSession?.date} - ساعت: {selectedSession?.time}
-            </Text>
-          </div>
-
-          <Form.Item
-            name="rating"
-            label="امتیاز شما به این جلسه"
-            rules={[
-              { required: true, message: 'لطفاً امتیاز خود را وارد کنید' },
-            ]}
-          >
-            <Rate />
-          </Form.Item>
-
-          <Form.Item
-            name="comment"
-            label="نظر شما"
-            rules={[{ required: true, message: 'لطفاً نظر خود را وارد کنید' }]}
-          >
-            <TextArea
-              rows={4}
-              placeholder="تجربه خود از این جلسه مشاوره را بنویسید"
-            />
-          </Form.Item>
-
-          <Form.Item name="anonymous" valuePropName="checked">
-            <Checkbox>نظر من به صورت ناشناس ثبت شود</Checkbox>
-          </Form.Item>
-
-          <Form.Item className="mb-0 text-left">
-            <Space>
-              <Button onClick={() => setReviewModalVisible(false)}>
-                انصراف
-              </Button>
-              <Button type="primary" htmlType="submit" icon={<StarOutlined />}>
-                ثبت نظر
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </div>
-  );
-}
+                <Text>{

@@ -7,7 +7,6 @@ import {
   EnvironmentOutlined,
   MailOutlined,
   MessageOutlined,
-  PaperClipOutlined,
   PhoneOutlined,
   PlayCircleOutlined,
   QuestionCircleOutlined,
@@ -36,6 +35,7 @@ import {
   Upload,
   message,
 } from 'antd';
+import ExpandableText from '@/components/common/expandable-text';
 
 const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
@@ -182,7 +182,13 @@ export default function Support() {
               <Collapse accordion>
                 {filteredFaqs.map((faq) => (
                   <Panel header={faq.question} key={faq.key}>
-                    <Paragraph>{faq.answer}</Paragraph>
+                    <ExpandableText
+                      maxLines={3}
+                      expandText="نمایش بیشتر"
+                      collapseText="نمایش کمتر"
+                    >
+                      {faq.answer}
+                    </ExpandableText>
                     <div className="mt-2">
                       <Tag color="blue">{faq.category}</Tag>
                     </div>
@@ -247,48 +253,54 @@ export default function Support() {
               <Title level={5}>راهنمای مشاوران</Title>
               <Collapse accordion>
                 <Panel header="نحوه تنظیم زمان‌های دردسترس" key="1">
-                  <ol className="list-inside list-decimal space-y-2">
-                    <li>به داشبورد مشاور خود بروید.</li>
-                    <li>بر روی گزینه «زمان‌های دردسترس» کلیک کنید.</li>
-                    <li>با استفاده از تقویم، روز مورد نظر را انتخاب کنید.</li>
-                    <li>بر روی دکمه «افزودن زمان جدید» کلیک کنید.</li>
-                    <li>ساعت شروع و پایان را تعیین کنید.</li>
-                    <li>بر روی دکمه «ذخیره» کلیک کنید.</li>
-                  </ol>
+                  <ExpandableText maxLines={4}>
+                    <ol className="list-inside list-decimal space-y-2">
+                      <li>به داشبورد مشاور خود بروید.</li>
+                      <li>بر روی گزینه «زمان‌های دردسترس» کلیک کنید.</li>
+                      <li>با استفاده از تقویم، روز مورد نظر را انتخاب کنید.</li>
+                      <li>بر روی دکمه «افزودن زمان جدید» کلیک کنید.</li>
+                      <li>ساعت شروع و پایان را تعیین کنید.</li>
+                      <li>بر روی دکمه «ذخیره» کلیک کنید.</li>
+                    </ol>
+                  </ExpandableText>
                 </Panel>
                 <Panel header="نحوه مدیریت جلسات" key="2">
-                  <ol className="list-inside list-decimal space-y-2">
-                    <li>به داشبورد مشاور خود بروید.</li>
-                    <li>بر روی گزینه «جلسات» کلیک کنید.</li>
-                    <li>
-                      جلسات آینده، برگزار شده و لغو شده را می‌توانید مشاهده
-                      کنید.
-                    </li>
-                    <li>
-                      برای هر جلسه می‌توانید وضعیت را تغییر دهید، یادداشت اضافه
-                      کنید یا به مراجع پیام ارسال کنید.
-                    </li>
-                  </ol>
+                  <ExpandableText maxLines={4}>
+                    <ol className="list-inside list-decimal space-y-2">
+                      <li>به داشبورد مشاور خود بروید.</li>
+                      <li>بر روی گزینه «جلسات» کلیک کنید.</li>
+                      <li>
+                        جلسات آینده، برگزار شده و لغو شده را می‌توانید مشاهده
+                        کنید.
+                      </li>
+                      <li>
+                        برای هر جلسه می‌توانید وضعیت را تغییر دهید، یادداشت
+                        اضافه کنید یا به مراجع پیام ارسال کنید.
+                      </li>
+                    </ol>
+                  </ExpandableText>
                 </Panel>
                 <Panel header="نحوه دریافت درآمد" key="3">
-                  <ol className="list-inside list-decimal space-y-2">
-                    <li>به داشبورد مشاور خود بروید.</li>
-                    <li>بر روی گزینه «مدیریت درآمد» کلیک کنید.</li>
-                    <li>
-                      در این بخش می‌توانید موجودی قابل برداشت، تراکنش‌ها و
-                      گزارش‌های مالی خود را مشاهده کنید.
-                    </li>
-                    <li>
-                      برای برداشت وجه، بر روی دکمه «درخواست برداشت» کلیک کنید.
-                    </li>
-                    <li>
-                      اطلاعات حساب بانکی خود را تکمیل کنید و درخواست را ثبت
-                      نمایید.
-                    </li>
-                    <li>
-                      درخواست برداشت شما طی 2 تا 3 روز کاری پردازش خواهد شد.
-                    </li>
-                  </ol>
+                  <ExpandableText maxLines={4}>
+                    <ol className="list-inside list-decimal space-y-2">
+                      <li>به داشبورد مشاور خود بروید.</li>
+                      <li>بر روی گزینه «مدیریت درآمد» کلیک کنید.</li>
+                      <li>
+                        در این بخش می‌توانید موجودی قابل برداشت، تراکنش‌ها و
+                        گزارش‌های مالی خود را مشاهده کنید.
+                      </li>
+                      <li>
+                        برای برداشت وجه، بر روی دکمه «درخواست برداشت» کلیک کنید.
+                      </li>
+                      <li>
+                        اطلاعات حساب بانکی خود را تکمیل کنید و درخواست را ثبت
+                        نمایید.
+                      </li>
+                      <li>
+                        درخواست برداشت شما طی 2 تا 3 روز کاری پردازش خواهد شد.
+                      </li>
+                    </ol>
+                  </ExpandableText>
                 </Panel>
               </Collapse>
             </div>

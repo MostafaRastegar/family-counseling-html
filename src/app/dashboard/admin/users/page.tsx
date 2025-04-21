@@ -6,28 +6,12 @@ import {
   EditOutlined,
   ExclamationCircleOutlined,
   LockOutlined,
-  MoreOutlined,
-  SearchOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  Dropdown,
-  Form,
-  Input,
-  Menu,
-  Modal,
-  Popconfirm,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from 'antd';
+import { Form, Input, Modal, Select, Space, Tag, message } from 'antd';
+import DataTable from '@/components/common/DataTable';
+import PageHeader from '@/components/common/PageHeader';
 
-const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
 
 // داده‌های نمونه برای کاربران
@@ -87,7 +71,6 @@ const mockUsers = [
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [resetPasswordModalVisible, setResetPasswordModalVisible] =
     useState(false);
@@ -102,14 +85,6 @@ export default function AdminUsers() {
       setLoading(false);
     }, 1000);
   }, []);
-
-  // فیلتر کردن کاربران
-  const filteredUsers = users.filter(
-    (user) =>
-      user.fullName.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-      user.phoneNumber.includes(searchText),
-  );
 
   // ویرایش کاربر
   const handleEdit = (user) => {
@@ -158,7 +133,7 @@ export default function AdminUsers() {
     message.success('رمز عبور با موفقیت بازنشانی شد!');
   };
 
-  // ستون‌های جدول
+  // Define columns for DataTable
   const columns = [
     {
       title: 'نام و نام خانوادگی',
@@ -218,89 +193,93 @@ export default function AdminUsers() {
       dataIndex: 'createdAt',
       key: 'createdAt',
     },
+  ];
+
+  // Define row actions
+  const rowActions = [
     {
-      title: 'عملیات',
-      key: 'action',
-      render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item
-                key="edit"
-                icon={<EditOutlined />}
-                onClick={() => handleEdit(record)}
-              >
-                ویرایش
-              </Menu.Item>
-              <Menu.Item
-                key="resetPassword"
-                icon={<LockOutlined />}
-                onClick={() => handleResetPassword(record)}
-              >
-                بازنشانی رمز عبور
-              </Menu.Item>
-              <Menu.Divider />
-              <Menu.Item key="delete" danger icon={<DeleteOutlined />}>
-                <Popconfirm
-                  title="آیا از حذف این کاربر مطمئن هستید؟"
-                  onConfirm={() => handleDelete(record.id)}
-                  okText="بله"
-                  cancelText="خیر"
-                  icon={<ExclamationCircleOutlined style={{ color: 'red' }} />}
-                >
-                  حذف کاربر
-                </Popconfirm>
-              </Menu.Item>
-            </Menu>
-          }
-          placement="bottomRight"
-        >
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
+      key: 'edit',
+      label: 'ویرایش',
+      icon: <EditOutlined />,
+      onClick: handleEdit,
+    },
+    {
+      key: 'resetPassword',
+      label: 'بازنشانی رمز عبور',
+      icon: <LockOutlined />,
+      onClick: handleResetPassword,
+    },
+    {
+      key: 'delete',
+      label: 'حذف کاربر',
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: (user) => {
+        Modal.confirm({
+          title: 'آیا از حذف این کاربر مطمئن هستید؟',
+          icon: <ExclamationCircleOutlined style={{ color: 'red' }} />,
+          content: 'با حذف کاربر، تمامی اطلاعات مربوط به آن نیز حذف خواهد شد.',
+          okText: 'بله',
+          cancelText: 'خیر',
+          onOk: () => handleDelete(user.id),
+        });
+      },
+    },
+  ];
+
+  // Define filter options
+  const filterOptions = [
+    {
+      key: 'role',
+      label: 'نقش کاربر',
+      type: 'select',
+      options: [
+        { value: 'admin', label: 'مدیر' },
+        { value: 'consultant', label: 'مشاور' },
+        { value: 'client', label: 'مراجع' },
+      ],
+    },
+    {
+      key: 'status',
+      label: 'وضعیت',
+      type: 'select',
+      options: [
+        { value: 'active', label: 'فعال' },
+        { value: 'inactive', label: 'غیرفعال' },
+        { value: 'suspended', label: 'تعلیق شده' },
+      ],
     },
   ];
 
   return (
     <div className="container mx-auto">
-      <Title level={2}>مدیریت کاربران</Title>
-      <Paragraph className="mb-8 text-gray-500">
-        مدیریت تمامی کاربران سیستم شامل مشاوران، مراجعان و مدیران.
-      </Paragraph>
+      <PageHeader
+        title="مدیریت کاربران"
+        description="مدیریت تمامی کاربران سیستم شامل مشاوران، مراجعان و مدیران."
+      />
 
-      <Card>
-        {/* ابزار جستجو */}
-        <div className="mb-6">
-          <Input
-            placeholder="جستجو بر اساس نام، ایمیل یا شماره تماس"
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-            size="large"
-          />
-        </div>
-
-        {/* جدول کاربران */}
-        <Table
-          columns={columns}
-          dataSource={filteredUsers}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} از ${total} کاربر`,
-          }}
-        />
-      </Card>
+      <DataTable
+        title="لیست کاربران"
+        dataSource={users}
+        columns={columns}
+        rowKey="id"
+        rowActions={rowActions}
+        filterOptions={filterOptions}
+        searchPlaceholder="جستجو بر اساس نام، ایمیل یا شماره تماس"
+        loading={loading}
+        onSearch={(value) => console.log('Search:', value)}
+        onFilter={(filters) => console.log('Filters:', filters)}
+        pagination={{ pageSize: 10 }}
+      />
 
       {/* مودال ویرایش کاربر */}
       <Modal
         title="ویرایش اطلاعات کاربر"
         open={editModalVisible}
         onCancel={() => setEditModalVisible(false)}
-        footer={null}
+        onOk={() => form.submit()}
+        okText="ذخیره تغییرات"
+        cancelText="انصراف"
       >
         <Form form={form} layout="vertical" onFinish={handleSaveUser}>
           <Form.Item
@@ -355,15 +334,6 @@ export default function AdminUsers() {
               <Option value="suspended">تعلیق شده</Option>
             </Select>
           </Form.Item>
-
-          <Form.Item className="mb-0 text-left">
-            <Space>
-              <Button onClick={() => setEditModalVisible(false)}>انصراف</Button>
-              <Button type="primary" htmlType="submit">
-                ذخیره تغییرات
-              </Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Modal>
 
@@ -372,13 +342,17 @@ export default function AdminUsers() {
         title="بازنشانی رمز عبور"
         open={resetPasswordModalVisible}
         onCancel={() => setResetPasswordModalVisible(false)}
-        footer={null}
+        onOk={() => passwordForm.submit()}
+        okText="بازنشانی رمز عبور"
+        cancelText="انصراف"
       >
         <div className="mb-4">
-          <Text>در حال بازنشانی رمز عبور برای:</Text>
-          <div className="mt-1 font-bold">
-            {selectedUser?.fullName} ({selectedUser?.email})
-          </div>
+          <Space direction="vertical">
+            <span>در حال بازنشانی رمز عبور برای:</span>
+            <strong>
+              {selectedUser?.fullName} ({selectedUser?.email})
+            </strong>
+          </Space>
         </div>
 
         <Form
@@ -419,22 +393,11 @@ export default function AdminUsers() {
           </Form.Item>
 
           <div className="bg-yellow-50 mb-4 rounded p-4">
-            <Text type="warning">
-              <ExclamationCircleOutlined className="mr-2" />
-              توجه: این عملیات رمز عبور کاربر را تغییر خواهد داد.
-            </Text>
-          </div>
-
-          <Form.Item className="mb-0 text-left">
             <Space>
-              <Button onClick={() => setResetPasswordModalVisible(false)}>
-                انصراف
-              </Button>
-              <Button type="primary" htmlType="submit">
-                بازنشانی رمز عبور
-              </Button>
+              <ExclamationCircleOutlined className="text-yellow-500" />
+              <span>توجه: این عملیات رمز عبور کاربر را تغییر خواهد داد.</span>
             </Space>
-          </Form.Item>
+          </div>
         </Form>
       </Modal>
     </div>

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import {
   BarChartOutlined,
   CalendarOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
   ExclamationCircleOutlined,
   StarOutlined,
   TeamOutlined,
@@ -17,11 +19,10 @@ import {
   List,
   Progress,
   Row,
-  Statistic,
   Tag,
   Typography,
 } from 'antd';
-import AdminStats from '@/components/admin/AdminStats';
+import StatsCards from '@/components/common/StatsCards';
 
 const { Title, Paragraph } = Typography;
 
@@ -36,6 +37,59 @@ const stats = {
   totalReviews: 320,
   averageRating: 4.7,
 };
+
+// Convert stats to StatsCards format
+const statsItems = [
+  {
+    title: 'کل کاربران',
+    value: stats.totalUsers,
+    icon: <UserOutlined />,
+    color: '#1890ff',
+  },
+  {
+    title: 'مشاوران',
+    value: stats.totalConsultants,
+    icon: <TeamOutlined />,
+    color: '#52c41a',
+  },
+  {
+    title: 'مراجعان',
+    value: stats.totalClients,
+    icon: <UserOutlined />,
+    color: '#722ed1',
+  },
+  {
+    title: 'جلسات',
+    value: stats.totalSessions,
+    icon: <CalendarOutlined />,
+    color: '#faad14',
+  },
+  {
+    title: 'جلسات در انتظار',
+    value: stats.pendingSessions,
+    icon: <ClockCircleOutlined />,
+    color: '#fa8c16',
+  },
+  {
+    title: 'جلسات برگزار شده',
+    value: stats.completedSessions,
+    icon: <CheckCircleOutlined />,
+    color: '#13c2c2',
+  },
+  {
+    title: 'نظرات',
+    value: stats.totalReviews,
+    icon: <StarOutlined />,
+    color: '#eb2f96',
+  },
+  {
+    title: 'میانگین امتیاز',
+    value: stats.averageRating,
+    icon: <StarOutlined />,
+    color: '#faad14',
+    suffix: '/5',
+  },
+];
 
 // داده‌های نمونه برای مشاوران در انتظار تأیید
 const pendingConsultants = [
@@ -68,7 +122,11 @@ export default function AdminDashboard() {
       </Paragraph>
 
       {/* آمار کلی */}
-      <AdminStats stats={stats} />
+      <StatsCards
+        stats={statsItems}
+        cols={{ xs: 24, sm: 12, md: 8, lg: 6 }}
+        className="mb-8"
+      />
 
       <Row gutter={[16, 16]} className="mt-8">
         {/* مشاوران در انتظار تأیید */}

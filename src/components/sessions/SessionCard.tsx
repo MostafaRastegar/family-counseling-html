@@ -1,88 +1,79 @@
 'use client';
 
-import Link from 'next/link';
 import {
   CalendarOutlined,
   ClockCircleOutlined,
   EyeOutlined,
   MessageOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import GenericCard from '@/components/common/GenericCard';
+import StatusBadge from '@/components/common/StatusBadge';
 
 const SessionCard = ({
   session,
   type = 'client',
   onViewDetails,
   onSendMessage,
-  onCancel,
-  onEdit,
-  onStatusChange,
   isUpcoming = false,
-}) => {
+}: any) => {
+  // Prepare status tag
+  const sessionStatus =
+    session.status === 'pending'
+      ? 'pending'
+      : session.status === 'confirmed'
+        ? 'confirmed'
+        : session.status === 'completed'
+          ? 'completed'
+          : 'cancelled';
+
+  // Prepare actions for the card
   const cardActions = [
     {
       key: 'view',
-      text: 'جزئیات',
-      icon: onViewDetails ? <EyeOutlined /> : undefined,
-      onClick: () => onViewDetails(session),
+      label: 'جزئیات',
+      icon: <EyeOutlined />,
+      onClick: () => onViewDetails?.(session),
       hide: !onViewDetails,
-      tooltip: 'مشاهده جزئیات',
     },
     {
       key: 'message',
-      text: 'ارسال پیام',
+      label: 'ارسال پیام',
       icon: <MessageOutlined />,
-      onClick: () => onSendMessage(session),
+      onClick: () => onSendMessage?.(session),
       hide: !(
         type === 'consultant' &&
         (session.status === 'confirmed' || session.status === 'pending') &&
         onSendMessage
       ),
     },
-  ];
+  ].filter((action) => !action.hide);
 
   return (
     <GenericCard
+      item={session}
       title={
         type === 'client'
           ? `جلسه با ${session.consultantName}`
           : `جلسه با ${session.clientName}`
       }
-      status={{
-        text:
-          session.status === 'pending'
-            ? 'در انتظار تأیید'
-            : session.status === 'confirmed'
-              ? 'تأیید شده'
-              : session.status === 'completed'
-                ? 'برگزار شده'
-                : 'لغو شده',
-        color:
-          session.status === 'pending'
-            ? 'warning'
-            : session.status === 'confirmed'
-              ? 'processing'
-              : session.status === 'completed'
-                ? 'success'
-                : 'error',
-      }}
-      avatar={{
-        src:
-          type === 'client' ? session.consultantAvatar : session.clientAvatar,
-        icon: <UserOutlined />,
-      }}
-      metadata={[
-        {
-          icon: <CalendarOutlined />,
-          text: session.date,
-        },
-        {
-          icon: <ClockCircleOutlined />,
-          text: `${session.time} (${session.duration} دقیقه)`,
-        },
-      ]}
+      status={<StatusBadge status={sessionStatus} type="tag" />}
+      imageUrl={
+        type === 'client' ? session.consultantAvatar : session.clientAvatar
+      }
       description={session.notes}
+      tags={[session.status]}
+      secondaryContent={
+        <div>
+          <div>
+            <CalendarOutlined className="mr-2" />
+            {session.date}
+          </div>
+          <div>
+            <ClockCircleOutlined className="mr-2" />
+            {session.time} ({session.duration} دقیقه)
+          </div>
+        </div>
+      }
       actions={cardActions}
       className={`session-card ${isUpcoming ? 'border-blue-200' : ''}`}
     />

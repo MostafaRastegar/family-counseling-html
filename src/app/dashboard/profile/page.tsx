@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import {
   ExclamationCircleOutlined,
   LockOutlined,
@@ -12,24 +11,20 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import {
-  Avatar,
-  Button,
   Card,
   Descriptions,
   Divider,
   Form,
-  Input,
   Modal,
-  Space,
   Tabs,
   Typography,
   Upload,
   message,
 } from 'antd';
+import FormBuilder from '@/components/common/FormBuilder';
 
 const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
-const { Password } = Input;
 const { confirm } = Modal;
 
 // داده‌های نمونه برای کاربر
@@ -70,6 +65,46 @@ export default function UserProfile() {
       }
     }, 1000);
   }, [profileForm]);
+
+  // آپلود تصویر پروفایل
+  const handleImageUpload = (info) => {
+    if (info.file.status === 'uploading') {
+      setUploadLoading(true);
+      return;
+    }
+
+    if (info.file.status === 'done') {
+      // در حالت واقعی، از URL تصویر آپلود شده از سرور استفاده می‌شود
+      // اما در اینجا از FileReader برای نمایش تصویر استفاده می‌کنیم
+      getBase64(info.file.originFileObj, (url) => {
+        setUploadLoading(false);
+        setImageUrl(url);
+        message.success('تصویر پروفایل با موفقیت آپلود شد!');
+      });
+    }
+  };
+
+  // تبدیل فایل به Base64 برای نمایش
+  function getBase64(img, callback) {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+  }
+
+  // بررسی نوع فایل آپلود شده
+  function beforeUpload(file) {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+      message.error('فقط فایل‌های JPG/PNG مجاز هستند!');
+    }
+
+    const isLt2M = file.size / 1024 / 1024 < 2;
+    if (!isLt2M) {
+      message.error('حجم تصویر باید کمتر از 2MB باشد!');
+    }
+
+    return isJpgOrPng && isLt2M;
+  }
 
   // بروزرسانی اطلاعات شخصی
   const handleProfileUpdate = (values) => {
@@ -125,57 +160,70 @@ export default function UserProfile() {
     return true; // ادامه روند ذخیره
   };
 
-  // آپلود تصویر پروفایل
-  const handleImageUpload = (info) => {
-    if (info.file.status === 'uploading') {
-      setUploadLoading(true);
-      return;
-    }
+  // تعریف فیلدهای فرم اطلاعات شخصی
+  const profileFields = [
+    {
+      name: 'fullName',
+      label: 'نام و نام خانوادگی',
+      type: 'text',
+      required: true,
+      prefix: <UserOutlined />,
+    },
+    {
+      name: 'email',
+      label: 'ایمیل',
+      type: 'email',
+      required: true,
+      prefix: <MailOutlined />,
+      rules: [{ type: 'email', message: 'ایمیل وارد شده معتبر نیست' }],
+    },
+    {
+      name: 'phoneNumber',
+      label: 'شماره تماس',
+      type: 'text',
+      required: true,
+      prefix: <PhoneOutlined />,
+    },
+  ];
 
-    if (info.file.status === 'done') {
-      // در حالت واقعی، از URL تصویر آپلود شده از سرور استفاده می‌شود
-      // اما در اینجا از FileReader برای نمایش تصویر استفاده می‌کنیم
-      getBase64(info.file.originFileObj, (url) => {
-        setUploadLoading(false);
-        setImageUrl(url);
-        message.success('تصویر پروفایل با موفقیت آپلود شد!');
-      });
-    }
-  };
-
-  // کاستومایز آپلود تصویر
-  const uploadButton = (
-    <div>
-      {uploadLoading ? (
-        <div className="animate-spin">⏳</div>
-      ) : (
-        <UploadOutlined />
-      )}
-      <div style={{ marginTop: 8 }}>آپلود تصویر</div>
-    </div>
-  );
-
-  // تبدیل فایل به Base64 برای نمایش
-  function getBase64(img, callback) {
-    const reader = new FileReader();
-    reader.addEventListener('load', () => callback(reader.result));
-    reader.readAsDataURL(img);
-  }
-
-  // بررسی نوع فایل آپلود شده
-  function beforeUpload(file) {
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-    if (!isJpgOrPng) {
-      message.error('فقط فایل‌های JPG/PNG مجاز هستند!');
-    }
-
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error('حجم تصویر باید کمتر از 2MB باشد!');
-    }
-
-    return isJpgOrPng && isLt2M;
-  }
+  // تعریف فیلدهای فرم تغییر رمز عبور
+  const passwordFields = [
+    {
+      name: 'currentPassword',
+      label: 'رمز عبور فعلی',
+      type: 'password',
+      required: true,
+      prefix: <LockOutlined />,
+    },
+    {
+      name: 'newPassword',
+      label: 'رمز عبور جدید',
+      type: 'password',
+      required: true,
+      prefix: <LockOutlined />,
+      rules: [{ min: 6, message: 'رمز عبور باید حداقل 6 کاراکتر باشد' }],
+    },
+    {
+      name: 'confirmPassword',
+      label: 'تکرار رمز عبور جدید',
+      type: 'password',
+      required: true,
+      prefix: <LockOutlined />,
+      dependencies: ['newPassword'],
+      rules: [
+        ({ getFieldValue }) => ({
+          validator(_, value) {
+            if (!value || getFieldValue('newPassword') === value) {
+              return Promise.resolve();
+            }
+            return Promise.reject(
+              new Error('رمز عبور و تکرار آن مطابقت ندارند'),
+            );
+          },
+        }),
+      ],
+    },
+  ];
 
   if (loading) {
     return (
@@ -212,7 +260,14 @@ export default function UserProfile() {
                   style={{ width: '100%', borderRadius: '100%' }}
                 />
               ) : (
-                uploadButton
+                <div>
+                  {uploadLoading ? (
+                    <div className="animate-spin">⏳</div>
+                  ) : (
+                    <UploadOutlined />
+                  )}
+                  <div style={{ marginTop: 8 }}>آپلود تصویر</div>
+                </div>
               )}
             </Upload>
             <Text className="mt-2 text-lg font-bold">{user.fullName}</Text>
@@ -250,64 +305,23 @@ export default function UserProfile() {
             }
             key="1"
           >
-            <Form
+            <FormBuilder
               form={profileForm}
-              layout="vertical"
+              fields={profileFields}
               onFinish={handleProfileUpdate}
               onValuesChange={(changedValues) => {
                 if (changedValues.email) {
                   confirmEmailChange(changedValues.email);
                 }
               }}
-            >
-              <Form.Item
-                name="fullName"
-                label="نام و نام خانوادگی"
-                rules={[
-                  {
-                    required: true,
-                    message: 'لطفاً نام و نام خانوادگی خود را وارد کنید',
-                  },
-                ]}
-              >
-                <Input prefix={<UserOutlined />} />
-              </Form.Item>
-
-              <Form.Item
-                name="email"
-                label="ایمیل"
-                rules={[
-                  { required: true, message: 'لطفاً ایمیل خود را وارد کنید' },
-                  { type: 'email', message: 'ایمیل وارد شده معتبر نیست' },
-                ]}
-              >
-                <Input prefix={<MailOutlined />} />
-              </Form.Item>
-
-              <Form.Item
-                name="phoneNumber"
-                label="شماره تماس"
-                rules={[
-                  {
-                    required: true,
-                    message: 'لطفاً شماره تماس خود را وارد کنید',
-                  },
-                ]}
-              >
-                <Input prefix={<PhoneOutlined />} />
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<SaveOutlined />}
-                  loading={saving}
-                >
-                  ذخیره تغییرات
-                </Button>
-              </Form.Item>
-            </Form>
+              layout="vertical"
+              submitButton={{
+                text: 'ذخیره تغییرات',
+                icon: <SaveOutlined />,
+                loading: saving,
+                type: 'primary',
+              }}
+            />
           </TabPane>
 
           <TabPane
@@ -319,73 +333,18 @@ export default function UserProfile() {
             }
             key="2"
           >
-            <Form
+            <FormBuilder
               form={passwordForm}
-              layout="vertical"
+              fields={passwordFields}
               onFinish={handlePasswordChange}
-            >
-              <Form.Item
-                name="currentPassword"
-                label="رمز عبور فعلی"
-                rules={[
-                  {
-                    required: true,
-                    message: 'لطفاً رمز عبور فعلی خود را وارد کنید',
-                  },
-                ]}
-              >
-                <Password prefix={<LockOutlined />} />
-              </Form.Item>
-
-              <Form.Item
-                name="newPassword"
-                label="رمز عبور جدید"
-                rules={[
-                  {
-                    required: true,
-                    message: 'لطفاً رمز عبور جدید را وارد کنید',
-                  },
-                  { min: 6, message: 'رمز عبور باید حداقل 6 کاراکتر باشد' },
-                ]}
-              >
-                <Password prefix={<LockOutlined />} />
-              </Form.Item>
-
-              <Form.Item
-                name="confirmPassword"
-                label="تکرار رمز عبور جدید"
-                dependencies={['newPassword']}
-                rules={[
-                  {
-                    required: true,
-                    message: 'لطفاً تکرار رمز عبور جدید را وارد کنید',
-                  },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('newPassword') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(
-                        new Error('رمز عبور و تکرار آن مطابقت ندارند'),
-                      );
-                    },
-                  }),
-                ]}
-              >
-                <Password prefix={<LockOutlined />} />
-              </Form.Item>
-
-              <Form.Item className="mb-0">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  icon={<SaveOutlined />}
-                  loading={saving}
-                >
-                  تغییر رمز عبور
-                </Button>
-              </Form.Item>
-            </Form>
+              layout="vertical"
+              submitButton={{
+                text: 'تغییر رمز عبور',
+                icon: <SaveOutlined />,
+                loading: saving,
+                type: 'primary',
+              }}
+            />
           </TabPane>
         </Tabs>
       </Card>

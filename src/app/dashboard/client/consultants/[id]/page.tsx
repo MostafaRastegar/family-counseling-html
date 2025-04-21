@@ -1,46 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
-  BookOutlined,
-  BulbOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
   CommentOutlined,
   StarOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Card,
-  Comment,
-  Divider,
-  List,
-  Rate,
-  Skeleton,
-  Tabs,
-  Tag,
-  Timeline,
-  Typography,
-  message,
-} from 'antd';
+import { Badge, Button, Card, Tabs, Tag, Typography, message } from 'antd';
 import BookingForm from '@/components/clients/BookingForm';
+import DetailView from '@/components/common/DetailView';
 import AvailabilityCalendar from '@/components/consultants/AvailabilityCalendar';
 import ReviewsList from '@/components/reviews/ReviewsList';
 import { consultants } from '@/mocks/consultants';
-// داده‌های نمونه
 import { reviews } from '@/mocks/reviews';
 
-// داده‌های نمونه
-
-const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
 
 export default function ConsultantDetail({ params }) {
-  const [consultant, setConsultant] = useState(null);
+  const [consultant, setConsultant] = useState({});
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('1');
   const searchParams = useSearchParams();
@@ -73,58 +53,110 @@ export default function ConsultantDetail({ params }) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4">
-        <Card>
-          <Skeleton avatar active paragraph={{ rows: 4 }} />
-        </Card>
-      </div>
+      <DetailView
+        loading={true}
+        sections={[
+          {
+            title: 'در حال بارگذاری...',
+            fields: [],
+          },
+        ]}
+      />
     );
   }
 
   if (!consultant) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <Title level={3}>مشاور مورد نظر یافت نشد</Title>
-        <Link href="/dashboard/client/consultants">
-          <Button type="primary" className="mt-4">
-            بازگشت به لیست مشاوران
-          </Button>
-        </Link>
-      </div>
+      <DetailView
+        sections={[
+          {
+            title: 'خطا',
+            fields: [
+              {
+                label: 'پیغام',
+                value: 'مشاور مورد نظر یافت نشد',
+              },
+            ],
+          },
+        ]}
+        actions={[
+          {
+            key: 'back',
+            label: 'بازگشت به لیست مشاوران',
+            onClick: () =>
+              (window.location.href = '/dashboard/client/consultants'),
+            type: 'primary',
+          },
+        ]}
+      />
     );
   }
 
   return (
-    <div className="container mx-auto px-4">
-      <Card>
-        <div className="mb-6 flex flex-col items-start md:flex-row md:items-center">
-          <Avatar
-            size={100}
-            src={consultant.image}
-            icon={!consultant.image && <UserOutlined />}
-            className="mb-4 md:mb-0 md:ml-6"
-          />
-          <div>
-            <Title level={3}>{consultant.name}</Title>
-            <div className="mb-3">
-              {consultant.specialties.map((specialty, index) => (
+    <DetailView
+      header={{
+        title: consultant?.name,
+        subtitle: consultant?.specialties?.join(', '),
+        avatar: {
+          src: consultant?.image,
+          icon: <UserOutlined />,
+        },
+        tags: [
+          consultant?.isVerified && (
+            <Tag color="green" icon={<CheckCircleOutlined />}>
+              مشاور تأیید شده
+            </Tag>
+          ),
+        ].filter(Boolean),
+      }}
+      sections={[
+        {
+          title: 'اطلاعات شخصی',
+          fields: [
+            {
+              label: 'شرح حال',
+              value: consultant?.bio,
+            },
+            {
+              label: 'تحصیلات و سوابق',
+              value: consultant?.education,
+            },
+            {
+              label: 'امتیاز',
+              value: (
+                <div className="flex items-center">
+                  <span>{consultant?.rating}</span>
+                  <StarOutlined className="text-yellow-500 mr-2" />
+                  <span>({consultant?.reviewCount} نظر)</span>
+                </div>
+              ),
+            },
+          ],
+        },
+        {
+          title: 'تخصص‌ها',
+          fields: [
+            {
+              label: 'حوزه‌های تخصصی',
+              value: consultant?.specialties.map((specialty, index) => (
                 <Tag key={index} color="blue" className="mb-1 ml-1">
                   {specialty}
                 </Tag>
-              ))}
-            </div>
-            <div className="mb-3 flex items-center">
-              <Rate disabled defaultValue={consultant.rating} />
-              <Text className="mr-2">({consultant.reviewCount} نظر)</Text>
-            </div>
-            {consultant.isVerified && (
-              <Tag color="green" icon={<CheckCircleOutlined />}>
-                مشاور تأیید شده
-              </Tag>
-            )}
-          </div>
-        </div>
-
+              )),
+            },
+          ],
+        },
+      ]}
+      actions={[
+        {
+          key: 'book-session',
+          label: 'رزرو جلسه مشاوره',
+          icon: <CalendarOutlined />,
+          onClick: () => setActiveTab('2'),
+          type: 'primary',
+        },
+      ]}
+      footer={
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane
             tab={
@@ -134,46 +166,7 @@ export default function ConsultantDetail({ params }) {
               </span>
             }
             key="1"
-          >
-            <div className="mb-6">
-              <Title level={4}>شرح حال</Title>
-              <Paragraph>{consultant.bio}</Paragraph>
-            </div>
-
-            <div className="mb-6">
-              <Title level={4}>تحصیلات و سوابق</Title>
-              <Paragraph>{consultant.education}</Paragraph>
-            </div>
-
-            <Divider />
-
-            <Title level={4}>تخصص‌ها</Title>
-            <div className="mb-6">
-              {consultant.specialties.map((specialty, index) => (
-                <Tag
-                  key={index}
-                  color="blue"
-                  className="mb-2 ml-2 px-3 py-1 text-base"
-                >
-                  {specialty}
-                </Tag>
-              ))}
-            </div>
-
-            <Divider />
-
-            <div className="text-center">
-              <Button
-                type="primary"
-                size="large"
-                icon={<CalendarOutlined />}
-                onClick={() => setActiveTab('2')}
-              >
-                رزرو جلسه مشاوره
-              </Button>
-            </div>
-          </TabPane>
-
+          />
           <TabPane
             tab={
               <span>
@@ -183,15 +176,17 @@ export default function ConsultantDetail({ params }) {
             }
             key="2"
           >
-            <Title level={4}>انتخاب زمان مشاوره</Title>
-            <Paragraph className="mb-6">
-              لطفاً تاریخ و زمان مورد نظر خود را برای جلسه مشاوره انتخاب کنید.
-            </Paragraph>
-
-            <AvailabilityCalendar consultantId={consultant.id} />
-            <BookingForm consultant={consultant} />
+            <Card>
+              <AvailabilityCalendar
+                consultantId={consultant?.id}
+                onSelectTimeSlot={undefined}
+              />
+              <BookingForm
+                consultant={consultant}
+                selectedTimeSlot={undefined}
+              />
+            </Card>
           </TabPane>
-
           <TabPane
             tab={
               <span>
@@ -204,7 +199,7 @@ export default function ConsultantDetail({ params }) {
             <ReviewsList reviews={consultantReviews} />
           </TabPane>
         </Tabs>
-      </Card>
-    </div>
+      }
+    />
   );
 }

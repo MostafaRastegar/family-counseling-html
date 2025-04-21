@@ -8,50 +8,38 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
-  EyeOutlined,
-  MoreOutlined,
-  SearchOutlined,
+  ExclamationCircleOutlined,
   StarOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import {
   Avatar,
+  Badge,
   Button,
-  Card,
   Col,
   Descriptions,
   Divider,
-  Dropdown,
-  Input,
   List,
-  Menu,
   Modal,
-  Popconfirm,
   Rate,
   Row,
   Space,
   Statistic,
-  Table,
   Tabs,
   Tag,
-  Typography,
   message,
 } from 'antd';
+import DataTable from '@/components/common/DataTable';
+import PageHeader from '@/components/common/PageHeader';
 import { consultants } from '@/mocks/consultants';
-// داده‌های نمونه
 import { reviews } from '@/mocks/reviews';
-// داده‌های نمونه
 import { sessions } from '@/mocks/sessions';
 
-// داده‌های نمونه
-
-const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
 
 export default function AdminConsultants() {
   const [allConsultants, setAllConsultants] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState(null);
   const [consultantReviews, setConsultantReviews] = useState([]);
@@ -64,15 +52,6 @@ export default function AdminConsultants() {
       setLoading(false);
     }, 1000);
   }, []);
-
-  // فیلتر کردن مشاوران
-  const filteredConsultants = allConsultants.filter(
-    (consultant) =>
-      consultant.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      consultant.specialties.some((specialty) =>
-        specialty.toLowerCase().includes(searchText.toLowerCase()),
-      ),
-  );
 
   // نمایش جزئیات مشاور
   const showConsultantDetails = (consultant) => {
@@ -119,7 +98,7 @@ export default function AdminConsultants() {
     message.success('مشاور با موفقیت حذف شد!');
   };
 
-  // ستون‌های جدول
+  // Define columns for DataTable
   const columns = [
     {
       title: 'نام و نام خانوادگی',
@@ -163,6 +142,7 @@ export default function AdminConsultants() {
           <span>({rating})</span>
         </Space>
       ),
+      sorter: (a, b) => a.rating - b.rating,
     },
     {
       title: 'وضعیت تأیید',
@@ -178,99 +158,115 @@ export default function AdminConsultants() {
             تأیید نشده
           </Tag>
         ),
+      filters: [
+        { text: 'تأیید شده', value: true },
+        { text: 'تأیید نشده', value: false },
+      ],
+      onFilter: (value, record) => record.isVerified === value,
+    },
+  ];
+
+  // Define filter options
+  const filterOptions = [
+    {
+      key: 'specialties',
+      label: 'تخصص',
+      type: 'select',
+      mode: 'multiple',
+      options: [
+        { value: 'مشاوره خانواده', label: 'مشاوره خانواده' },
+        { value: 'روابط زناشویی', label: 'روابط زناشویی' },
+        { value: 'فرزندپروری', label: 'فرزندپروری' },
+        { value: 'مشاوره تحصیلی', label: 'مشاوره تحصیلی' },
+      ],
     },
     {
-      title: 'عملیات',
-      key: 'action',
-      render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item
-                key="view"
-                icon={<EyeOutlined />}
-                onClick={() => showConsultantDetails(record)}
-              >
-                مشاهده جزئیات
-              </Menu.Item>
-              <Menu.Item key="edit" icon={<EditOutlined />}>
-                <Link href={`/dashboard/admin/consultants/edit/${record.id}`}>
-                  ویرایش
-                </Link>
-              </Menu.Item>
-              <Menu.Divider />
-              {record.isVerified ? (
-                <Menu.Item
-                  key="reject"
-                  icon={<CloseCircleOutlined />}
-                  danger
-                  onClick={() => handleVerificationChange(record.id, false)}
-                >
-                  لغو تأیید
-                </Menu.Item>
-              ) : (
-                <Menu.Item
-                  key="verify"
-                  icon={<CheckCircleOutlined />}
-                  onClick={() => handleVerificationChange(record.id, true)}
-                >
-                  تأیید مشاور
-                </Menu.Item>
-              )}
-              <Menu.Divider />
-              <Menu.Item key="delete" danger icon={<DeleteOutlined />}>
-                <Popconfirm
-                  title="آیا از حذف این مشاور مطمئن هستید؟"
-                  onConfirm={() => handleDelete(record.id)}
-                  okText="بله"
-                  cancelText="خیر"
-                >
-                  حذف مشاور
-                </Popconfirm>
-              </Menu.Item>
-            </Menu>
-          }
-          placement="bottomRight"
-        >
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
+      key: 'rating',
+      label: 'حداقل امتیاز',
+      type: 'select',
+      options: [
+        { value: 5, label: '5 ستاره' },
+        { value: 4, label: '4 ستاره و بالاتر' },
+        { value: 3, label: '3 ستاره و بالاتر' },
+      ],
+    },
+  ];
+
+  // Define row actions
+  const rowActions = (record) => [
+    {
+      key: 'view',
+      label: 'مشاهده جزئیات',
+      icon: <UserOutlined />,
+      onClick: () => showConsultantDetails(record),
+    },
+    {
+      key: 'edit',
+      label: 'ویرایش',
+      icon: <EditOutlined />,
+      href: `/dashboard/admin/consultants/edit/${record.id}`,
+    },
+    record.isVerified
+      ? {
+          key: 'reject',
+          label: 'لغو تأیید',
+          icon: <CloseCircleOutlined />,
+          danger: true,
+          onClick: () => handleVerificationChange(record.id, false),
+        }
+      : {
+          key: 'verify',
+          label: 'تأیید مشاور',
+          icon: <CheckCircleOutlined />,
+          onClick: () => handleVerificationChange(record.id, true),
+        },
+    {
+      key: 'delete',
+      label: 'حذف مشاور',
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: () => {
+        Modal.confirm({
+          title: 'آیا از حذف این مشاور مطمئن هستید؟',
+          icon: <ExclamationCircleOutlined style={{ color: 'red' }} />,
+          content: 'با حذف مشاور، تمامی اطلاعات مربوط به آن نیز حذف خواهد شد.',
+          okText: 'بله',
+          cancelText: 'خیر',
+          onOk: () => handleDelete(record.id),
+        });
+      },
     },
   ];
 
   return (
     <div className="container mx-auto">
-      <Title level={2}>مدیریت مشاوران</Title>
-      <Paragraph className="mb-8 text-gray-500">
-        مدیریت تمامی مشاوران فعال در سیستم و بررسی عملکرد آن‌ها.
-      </Paragraph>
+      <PageHeader
+        title="مدیریت مشاوران"
+        description="مدیریت تمامی مشاوران فعال در سیستم و بررسی عملکرد آن‌ها."
+      />
 
-      <Card>
-        {/* ابزار جستجو */}
-        <div className="mb-6">
-          <Input
-            placeholder="جستجو بر اساس نام یا تخصص"
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-            size="large"
-          />
-        </div>
-
-        {/* جدول مشاوران */}
-        <Table
-          columns={columns}
-          dataSource={filteredConsultants}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} از ${total} مشاور`,
-          }}
-        />
-      </Card>
+      <DataTable
+        title="لیست مشاوران"
+        dataSource={allConsultants}
+        columns={columns}
+        rowKey="id"
+        rowActions={rowActions}
+        filterOptions={filterOptions}
+        searchPlaceholder="جستجو بر اساس نام یا تخصص"
+        loading={loading}
+        onRefresh={() => {
+          setLoading(true);
+          setTimeout(() => {
+            setAllConsultants([...consultants]);
+            setLoading(false);
+          }, 1000);
+        }}
+        pagination={{
+          pageSize: 10,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} از ${total} مشاور`,
+        }}
+      />
 
       {/* مودال جزئیات مشاور */}
       <Modal
@@ -279,6 +275,42 @@ export default function AdminConsultants() {
         onCancel={() => setDetailModalVisible(false)}
         width={800}
         footer={[
+          <Button key="edit" type="default" icon={<EditOutlined />}>
+            <Link
+              href={
+                selectedConsultant
+                  ? `/dashboard/admin/consultants/edit/${selectedConsultant.id}`
+                  : '#'
+              }
+            >
+              ویرایش اطلاعات
+            </Link>
+          </Button>,
+          selectedConsultant?.isVerified ? (
+            <Button
+              key="reject"
+              danger
+              icon={<CloseCircleOutlined />}
+              onClick={() =>
+                handleVerificationChange(selectedConsultant.id, false)
+              }
+              disabled={!selectedConsultant}
+            >
+              لغو تأیید
+            </Button>
+          ) : (
+            <Button
+              key="verify"
+              type="primary"
+              icon={<CheckCircleOutlined />}
+              onClick={() =>
+                handleVerificationChange(selectedConsultant?.id, true)
+              }
+              disabled={!selectedConsultant}
+            >
+              تأیید مشاور
+            </Button>
+          ),
           <Button key="back" onClick={() => setDetailModalVisible(false)}>
             بستن
           </Button>,
@@ -294,9 +326,9 @@ export default function AdminConsultants() {
                 className="ml-4"
               />
               <div>
-                <Title level={4} className="mb-1">
+                <h4 className="mb-1 text-xl font-bold">
                   {selectedConsultant.name}
-                </Title>
+                </h4>
                 <div className="mb-2">
                   {selectedConsultant.isVerified ? (
                     <Tag color="success" icon={<CheckCircleOutlined />}>
@@ -367,24 +399,26 @@ export default function AdminConsultants() {
                       <List.Item>
                         <div>
                           <div className="mb-2 flex items-center justify-between">
-                            <Text strong>{review.clientName}</Text>
-                            <Text type="secondary">{review.date}</Text>
+                            <span className="font-medium">
+                              {review.clientName}
+                            </span>
+                            <span className="text-gray-500">{review.date}</span>
                           </div>
                           <Rate
                             disabled
                             defaultValue={review.rating}
                             className="mb-2"
                           />
-                          <Paragraph>{review.comment}</Paragraph>
+                          <p>{review.comment}</p>
                         </div>
                       </List.Item>
                     )}
                   />
                 ) : (
                   <div className="py-4 text-center">
-                    <Text type="secondary">
+                    <span className="text-gray-500">
                       هیچ نظری برای این مشاور ثبت نشده است
-                    </Text>
+                    </span>
                   </div>
                 )}
               </TabPane>
@@ -398,7 +432,7 @@ export default function AdminConsultants() {
                         <List.Item.Meta
                           title={
                             <Space>
-                              <Text>{session.clientName}</Text>
+                              <span>{session.clientName}</span>
                               <Tag
                                 color={
                                   session.status === 'completed'
@@ -422,13 +456,13 @@ export default function AdminConsultants() {
                           }
                           description={
                             <Space direction="vertical">
-                              <Text>
+                              <span>
                                 {session.date} - ساعت {session.time}
-                              </Text>
+                              </span>
                               {session.notes && (
-                                <Text type="secondary">
+                                <span className="text-gray-500">
                                   یادداشت: {session.notes}
-                                </Text>
+                                </span>
                               )}
                             </Space>
                           }
@@ -438,47 +472,13 @@ export default function AdminConsultants() {
                   />
                 ) : (
                   <div className="py-4 text-center">
-                    <Text type="secondary">
+                    <span className="text-gray-500">
                       هیچ جلسه‌ای برای این مشاور ثبت نشده است
-                    </Text>
+                    </span>
                   </div>
                 )}
               </TabPane>
             </Tabs>
-
-            <Divider />
-
-            <div className="flex justify-between">
-              <Space>
-                <Button
-                  type={selectedConsultant.isVerified ? 'default' : 'primary'}
-                  icon={<CheckCircleOutlined />}
-                  onClick={() =>
-                    handleVerificationChange(selectedConsultant.id, true)
-                  }
-                  disabled={selectedConsultant.isVerified}
-                >
-                  تأیید مشاور
-                </Button>
-                <Button
-                  danger
-                  icon={<CloseCircleOutlined />}
-                  onClick={() =>
-                    handleVerificationChange(selectedConsultant.id, false)
-                  }
-                  disabled={!selectedConsultant.isVerified}
-                >
-                  لغو تأیید
-                </Button>
-              </Space>
-              <Link
-                href={`/dashboard/admin/consultants/edit/${selectedConsultant.id}`}
-              >
-                <Button type="default" icon={<EditOutlined />}>
-                  ویرایش اطلاعات
-                </Button>
-              </Link>
-            </div>
           </div>
         )}
       </Modal>

@@ -7,13 +7,9 @@ import {
   EditOutlined,
   EyeOutlined,
   MessageOutlined,
-  SearchOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import {
-  Button,
-  Card,
-  DatePicker,
   Descriptions,
   Divider,
   Form,
@@ -21,31 +17,20 @@ import {
   Modal,
   Select,
   Space,
-  Table,
-  Tabs,
-  Tag,
   Typography,
-  message,
 } from 'antd';
-import SessionStatusBadge from '@/components/sessions/SessionStatusBadge';
+import DataTable from '@/components/common/DataTable';
+import PageHeader from '@/components/common/PageHeader';
+import StatusBadge from '@/components/common/StatusBadge';
 import { sessions } from '@/mocks/sessions';
 
-// داده‌های نمونه
-
 const { Title, Paragraph, Text } = Typography;
-const { TabPane } = Tabs;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
 export default function AdminSessions() {
   const [allSessions, setAllSessions] = useState([]);
-  const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
-  const [searchText, setSearchText] = useState('');
-  const [dateRange, setDateRange] = useState(null);
-  const [statusFilter, setStatusFilter] = useState(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -55,50 +40,9 @@ export default function AdminSessions() {
     // شبیه‌سازی دریافت داده‌ها از API
     setTimeout(() => {
       setAllSessions(sessions);
-      setFilteredSessions(sessions);
       setLoading(false);
     }, 1000);
   }, []);
-
-  // اعمال فیلترها
-  useEffect(() => {
-    let result = [...allSessions];
-
-    // فیلتر بر اساس متن جستجو
-    if (searchText) {
-      result = result.filter(
-        (session) =>
-          session.consultantName
-            .toLowerCase()
-            .includes(searchText.toLowerCase()) ||
-          session.clientName.toLowerCase().includes(searchText.toLowerCase()),
-      );
-    }
-
-    // فیلتر بر اساس وضعیت
-    if (statusFilter) {
-      result = result.filter((session) => session.status === statusFilter);
-    }
-
-    // فیلتر بر اساس تاریخ
-    if (dateRange) {
-      // این قسمت نیاز به پیاده‌سازی دقیق‌تری با تبدیل تاریخ دارد
-      // اما در حالت استاتیک نمونه می‌ماند
-    }
-
-    // فیلتر بر اساس تب فعال
-    if (activeTab === 'pending') {
-      result = result.filter((session) => session.status === 'pending');
-    } else if (activeTab === 'confirmed') {
-      result = result.filter((session) => session.status === 'confirmed');
-    } else if (activeTab === 'completed') {
-      result = result.filter((session) => session.status === 'completed');
-    } else if (activeTab === 'cancelled') {
-      result = result.filter((session) => session.status === 'cancelled');
-    }
-
-    setFilteredSessions(result);
-  }, [searchText, statusFilter, dateRange, activeTab, allSessions]);
 
   // نمایش جزئیات جلسه
   const showSessionDetails = (session) => {
@@ -132,27 +76,29 @@ export default function AdminSessions() {
 
       setAllSessions(updatedSessions);
       setEditModalVisible(false);
-      message.success('اطلاعات جلسه با موفقیت بروزرسانی شد!');
       setLoading(false);
     }, 1000);
   };
 
-  // ستون‌های جدول
+  // Define columns for DataTable
   const columns = [
     {
       title: 'مشاور',
       dataIndex: 'consultantName',
       key: 'consultant',
+      sorter: (a, b) => a.consultantName.localeCompare(b.consultantName),
     },
     {
       title: 'مراجع',
       dataIndex: 'clientName',
       key: 'client',
+      sorter: (a, b) => a.clientName.localeCompare(b.clientName),
     },
     {
       title: 'تاریخ',
       dataIndex: 'date',
       key: 'date',
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
     },
     {
       title: 'ساعت',
@@ -163,121 +109,105 @@ export default function AdminSessions() {
       title: 'وضعیت',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => <SessionStatusBadge status={status} />,
-    },
-    {
-      title: 'عملیات',
-      key: 'action',
-      render: (_, record) => (
-        <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => showSessionDetails(record)}
-            size="small"
-          >
-            جزئیات
-          </Button>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-            size="small"
-          >
-            ویرایش
-          </Button>
-        </Space>
-      ),
+      render: (status) => <StatusBadge status={status} />,
     },
   ];
 
-  // مقادیر تب‌ها
-  const tabItems = [
-    { key: 'all', label: 'همه جلسات', count: allSessions.length },
+  // Define filter options for DataTable
+  const filterOptions = [
     {
-      key: 'pending',
-      label: 'در انتظار تأیید',
-      count: allSessions.filter((s) => s.status === 'pending').length,
+      key: 'status',
+      label: 'وضعیت',
+      type: 'select',
+      options: [
+        { value: 'pending', label: 'در انتظار تأیید' },
+        { value: 'confirmed', label: 'تأیید شده' },
+        { value: 'completed', label: 'برگزار شده' },
+        { value: 'cancelled', label: 'لغو شده' },
+      ],
     },
     {
-      key: 'confirmed',
-      label: 'تأیید شده',
-      count: allSessions.filter((s) => s.status === 'confirmed').length,
-    },
-    {
-      key: 'completed',
-      label: 'برگزار شده',
-      count: allSessions.filter((s) => s.status === 'completed').length,
-    },
-    {
-      key: 'cancelled',
-      label: 'لغو شده',
-      count: allSessions.filter((s) => s.status === 'cancelled').length,
+      key: 'dateRange',
+      label: 'بازه زمانی',
+      type: 'dateRange',
+      placeholder: 'انتخاب تاریخ',
     },
   ];
+
+  // Define row actions for DataTable
+  const rowActions = [
+    {
+      key: 'view',
+      label: 'جزئیات',
+      icon: <EyeOutlined />,
+      onClick: showSessionDetails,
+    },
+    {
+      key: 'edit',
+      label: 'ویرایش',
+      icon: <EditOutlined />,
+      onClick: showEditModal,
+    },
+  ];
+
+  // Get tab items for DataTable
+  const tabItems = [
+    { key: 'all', label: 'همه جلسات' },
+    { key: 'pending', label: 'در انتظار تأیید' },
+    { key: 'confirmed', label: 'تأیید شده' },
+    { key: 'completed', label: 'برگزار شده' },
+    { key: 'cancelled', label: 'لغو شده' },
+  ];
+
+  // Handle tab change filtering
+  const handleTabChange = (key) => {
+    if (key === 'all') {
+      return allSessions;
+    }
+    return allSessions.filter((session) => session.status === key);
+  };
 
   return (
     <div className="container mx-auto">
-      <Title level={2}>مدیریت جلسات</Title>
-      <Paragraph className="mb-8 text-gray-500">
-        نمایش و مدیریت تمامی جلسات مشاوره در سیستم.
-      </Paragraph>
+      <PageHeader
+        title="مدیریت جلسات"
+        description="نمایش و مدیریت تمامی جلسات مشاوره در سیستم."
+      />
 
-      <Card>
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={tabItems.map((item) => ({
-            key: item.key,
-            label: (
-              <span>
-                {item.label} <Tag>{item.count}</Tag>
-              </span>
-            ),
-          }))}
-        />
-
-        {/* ابزارهای فیلتر */}
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Input
-            placeholder="جستجوی نام مشاور یا مراجع"
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-          />
-
-          <Select
-            placeholder="فیلتر بر اساس وضعیت"
-            value={statusFilter}
-            onChange={setStatusFilter}
-            allowClear
-            style={{ width: '100%' }}
-          >
-            <Option value="pending">در انتظار تأیید</Option>
-            <Option value="confirmed">تأیید شده</Option>
-            <Option value="completed">برگزار شده</Option>
-            <Option value="cancelled">لغو شده</Option>
-          </Select>
-
-          <RangePicker
-            placeholder={['از تاریخ', 'تا تاریخ']}
-            style={{ width: '100%' }}
-            onChange={setDateRange}
-          />
-        </div>
-
-        {/* جدول جلسات */}
-        <Table
-          columns={columns}
-          dataSource={filteredSessions}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} از ${total} جلسه`,
-          }}
-        />
-      </Card>
+      <DataTable
+        title="لیست جلسات"
+        dataSource={allSessions}
+        columns={columns}
+        rowKey="id"
+        loading={loading}
+        rowActions={rowActions}
+        filterOptions={filterOptions}
+        searchPlaceholder="جستجوی نام مشاور یا مراجع"
+        onSearch={(value) => {
+          console.log('Search:', value);
+          // در پیاده‌سازی واقعی، جستجو روی داده‌ها انجام می‌شود
+        }}
+        onFilter={(filters) => {
+          console.log('Filters applied:', filters);
+          // در پیاده‌سازی واقعی، فیلترها روی داده‌ها اعمال می‌شوند
+        }}
+        onRefresh={() => {
+          setLoading(true);
+          setTimeout(() => {
+            setAllSessions([...sessions]);
+            setLoading(false);
+          }, 1000);
+        }}
+        pagination={{
+          pageSize: 10,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} از ${total} جلسه`,
+        }}
+        tabs={{
+          items: tabItems,
+          onChange: handleTabChange,
+        }}
+      />
 
       {/* مودال جزئیات جلسه */}
       <Modal
@@ -338,7 +268,7 @@ export default function AdminSessions() {
                 {`${selectedSession.time} (${selectedSession.duration} دقیقه)`}
               </Descriptions.Item>
               <Descriptions.Item label="وضعیت">
-                <SessionStatusBadge status={selectedSession.status} />
+                <StatusBadge status={selectedSession.status} />
               </Descriptions.Item>
             </Descriptions>
 
@@ -377,7 +307,9 @@ export default function AdminSessions() {
         title="ویرایش جلسه مشاوره"
         open={editModalVisible}
         onCancel={() => setEditModalVisible(false)}
-        footer={null}
+        onOk={() => form.submit()}
+        okText="ذخیره تغییرات"
+        cancelText="انصراف"
       >
         {selectedSession && (
           <Form form={form} layout="vertical" onFinish={handleUpdateSession}>
@@ -413,17 +345,6 @@ export default function AdminSessions() {
                 rows={4}
                 placeholder="یادداشت‌های مربوط به این جلسه را وارد کنید"
               />
-            </Form.Item>
-
-            <Form.Item className="mb-0 text-left">
-              <Space>
-                <Button onClick={() => setEditModalVisible(false)}>
-                  انصراف
-                </Button>
-                <Button type="primary" htmlType="submit" loading={loading}>
-                  ذخیره تغییرات
-                </Button>
-              </Space>
             </Form.Item>
           </Form>
         )}

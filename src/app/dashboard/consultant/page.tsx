@@ -9,24 +9,13 @@ import {
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Badge,
-  Button,
-  Card,
-  Col,
-  Divider,
-  List,
-  Row,
-  Statistic,
-  Tag,
-  Typography,
-} from 'antd';
-import DashboardStats from '@/components/dashboard/DashboardStats';
+import { Badge, Button, Card, Col, List, Row, Typography } from 'antd';
+import StatsCards from '@/components/common/StatsCards';
 
 const { Title, Paragraph } = Typography;
 
 // داده‌های نمونه برای آمار
-const stats = [
+const statsItems = [
   {
     title: 'جلسات امروز',
     value: 3,
@@ -44,6 +33,7 @@ const stats = [
     value: '4.8',
     icon: <StarOutlined />,
     color: '#faad14',
+    suffix: '/5',
   },
   {
     title: 'درآمد ماه جاری',
@@ -106,7 +96,7 @@ export default function ConsultantDashboard() {
       </Paragraph>
 
       {/* آمار */}
-      <DashboardStats stats={stats} />
+      <StatsCards stats={statsItems} gutter={[16, 16]} className="mb-8" />
 
       <Row gutter={[16, 16]} className="mt-8">
         {/* جلسات امروز */}

@@ -1,42 +1,22 @@
 'use client';
 
-import {
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-  ExclamationCircleOutlined,
-} from '@ant-design/icons';
-import { Tag } from 'antd';
+import StatusBadge from '@/components/common/StatusBadge';
 
-const SessionStatusBadge = ({ status }: any) => {
-  switch (status) {
-    case 'pending':
-      return (
-        <Tag color="warning" icon={<ClockCircleOutlined />}>
-          در انتظار تأیید
-        </Tag>
-      );
-    case 'confirmed':
-      return (
-        <Tag color="processing" icon={<ExclamationCircleOutlined />}>
-          تأیید شده
-        </Tag>
-      );
-    case 'completed':
-      return (
-        <Tag color="success" icon={<CheckCircleOutlined />}>
-          برگزار شده
-        </Tag>
-      );
-    case 'cancelled':
-      return (
-        <Tag color="error" icon={<CloseCircleOutlined />}>
-          لغو شده
-        </Tag>
-      );
-    default:
-      return null;
-  }
+const SessionStatusBadge = ({ status }: { status: string }) => {
+  return (
+    <StatusBadge
+      status={
+        status === 'pending'
+          ? 'pending'
+          : status === 'confirmed'
+            ? 'confirmed'
+            : status === 'completed'
+              ? 'completed'
+              : 'cancelled'
+      }
+      type="tag"
+    />
+  );
 };
 
 export default SessionStatusBadge;

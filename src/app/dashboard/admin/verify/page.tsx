@@ -12,13 +12,12 @@ import {
 } from '@ant-design/icons';
 import {
   Avatar,
+  Badge,
   Button,
   Card,
   Descriptions,
-  Divider,
   Empty,
   Form,
-  Input,
   List,
   Modal,
   Space,
@@ -26,12 +25,11 @@ import {
   Typography,
   message,
 } from 'antd';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
+import FormModal from '@/components/common/FormModal';
 import { consultants } from '@/mocks/consultants';
 
-// داده‌های نمونه
-
 const { Title, Paragraph, Text } = Typography;
-const { TextArea } = Input;
 
 // فیلتر کردن فقط مشاوران تأیید نشده
 const pendingConsultants = consultants.filter(
@@ -42,6 +40,7 @@ export default function AdminVerifyConsultants() {
   const [consultantsToVerify, setConsultantsToVerify] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [rejectDialogVisible, setRejectDialogVisible] = useState(false);
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [selectedConsultant, setSelectedConsultant] = useState(null);
   const [form] = Form.useForm();
@@ -75,9 +74,15 @@ export default function AdminVerifyConsultants() {
     }, 1000);
   };
 
-  // نمایش مودال رد درخواست
-  const showRejectModal = (consultant) => {
+  // نمایش دیالوگ تایید رد درخواست
+  const showRejectConfirmDialog = (consultant) => {
     setSelectedConsultant(consultant);
+    setRejectDialogVisible(true);
+  };
+
+  // تایید رد درخواست
+  const handleConfirmReject = () => {
+    setRejectDialogVisible(false);
     setDetailModalVisible(false);
     setRejectModalVisible(true);
   };
@@ -96,6 +101,26 @@ export default function AdminVerifyConsultants() {
       setLoading(false);
     }, 1000);
   };
+
+  // تعریف فیلدهای فرم رد درخواست
+  const rejectFields = [
+    {
+      name: 'reason',
+      label: 'دلیل رد درخواست',
+      type: 'textarea',
+      required: true,
+      placeholder:
+        'دلیل رد درخواست را وارد کنید. این متن برای مشاور ارسال خواهد شد.',
+      rows: 4,
+    },
+    {
+      name: 'additionalInfo',
+      label: 'اطلاعات تکمیلی (اختیاری)',
+      type: 'textarea',
+      placeholder: 'در صورت نیاز، اطلاعات بیشتری را برای مشاور وارد کنید.',
+      rows: 3,
+    },
+  ];
 
   return (
     <div className="container mx-auto">
@@ -131,7 +156,7 @@ export default function AdminVerifyConsultants() {
                     key="reject"
                     danger
                     icon={<CloseCircleOutlined />}
-                    onClick={() => showRejectModal(consultant)}
+                    onClick={() => showRejectConfirmDialog(consultant)}
                   >
                     رد
                   </Button>,
@@ -186,7 +211,7 @@ export default function AdminVerifyConsultants() {
             key="reject"
             danger
             icon={<CloseCircleOutlined />}
-            onClick={() => showRejectModal(selectedConsultant)}
+            onClick={() => showRejectConfirmDialog(selectedConsultant)}
           >
             رد درخواست
           </Button>,
@@ -287,51 +312,44 @@ export default function AdminVerifyConsultants() {
         )}
       </Modal>
 
+      {/* دیالوگ تایید رد درخواست */}
+      <ConfirmDialog
+        visible={rejectDialogVisible}
+        title="آیا از رد درخواست این مشاور اطمینان دارید؟"
+        content="با رد درخواست، این مشاور نمی‌تواند در سیستم فعالیت کند و باید دلیل رد درخواست را مشخص کنید."
+        type="warning"
+        onConfirm={handleConfirmReject}
+        onCancel={() => setRejectDialogVisible(false)}
+        confirmText="بله، رد شود"
+        cancelText="انصراف"
+        confirmButtonProps={{ danger: true }}
+      />
+
       {/* مودال رد درخواست */}
-      <Modal
+      <FormModal
         title="رد درخواست مشاور"
-        open={rejectModalVisible}
+        visible={rejectModalVisible}
         onCancel={() => setRejectModalVisible(false)}
-        footer={null}
-      >
-        <Form form={form} layout="vertical" onFinish={handleReject}>
-          <div className="mb-4">
-            <Text>در حال رد درخواست مشاور:</Text>
-            <div className="mt-1 font-bold">{selectedConsultant?.name}</div>
-          </div>
-
-          <Form.Item
-            name="reason"
-            label="دلیل رد درخواست"
-            rules={[
-              { required: true, message: 'لطفاً دلیل رد درخواست را وارد کنید' },
-            ]}
-          >
-            <TextArea
-              rows={4}
-              placeholder="دلیل رد درخواست را وارد کنید. این متن برای مشاور ارسال خواهد شد."
-            />
-          </Form.Item>
-
-          <Form.Item name="additionalInfo" label="اطلاعات تکمیلی (اختیاری)">
-            <TextArea
-              rows={3}
-              placeholder="در صورت نیاز، اطلاعات بیشتری را برای مشاور وارد کنید."
-            />
-          </Form.Item>
-
-          <Form.Item className="mb-0 text-left">
-            <Space>
-              <Button onClick={() => setRejectModalVisible(false)}>
-                انصراف
-              </Button>
-              <Button type="primary" danger htmlType="submit" loading={loading}>
-                رد درخواست
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
+        onSubmit={handleReject}
+        submitText="رد درخواست"
+        cancelText="انصراف"
+        form={form}
+        fields={rejectFields}
+        loading={loading}
+        layout="vertical"
+        submitButton={{
+          danger: true,
+          type: 'primary',
+        }}
+        beforeForm={
+          selectedConsultant && (
+            <div className="mb-4">
+              <Text>در حال رد درخواست مشاور:</Text>
+              <div className="mt-1 font-bold">{selectedConsultant?.name}</div>
+            </div>
+          )
+        }
+      />
     </div>
   );
 }

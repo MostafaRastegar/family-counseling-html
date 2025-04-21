@@ -24,6 +24,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import ExpandableText from '../common/expandable-text';
 
 const { Text, Paragraph } = Typography;
 
@@ -184,7 +185,13 @@ const ReviewsList = ({
               }
             />
             <div className="mt-2">
-              <Paragraph>{review.comment}</Paragraph>
+              <ExpandableText
+                maxLines={2}
+                expandText="نمایش بیشتر"
+                collapseText="نمایش کمتر"
+              >
+                {review.comment}
+              </ExpandableText>
 
               {review.reply && (
                 <div className="bg-gray-50 mt-4 rounded p-4">
@@ -204,9 +211,13 @@ const ReviewsList = ({
                           {review.replyDate}
                         </Text>
                       </Space>
-                      <Paragraph className="text-gray-700">
+                      <ExpandableText
+                        maxLines={2}
+                        expandText="نمایش بیشتر"
+                        collapseText="نمایش کمتر"
+                      >
                         {review.reply}
-                      </Paragraph>
+                      </ExpandableText>
                     </div>
                   </div>
                 </div>

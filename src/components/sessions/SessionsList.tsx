@@ -2,250 +2,192 @@
 
 import { useState } from 'react';
 import {
-  CalendarOutlined,
-  FilterOutlined,
-  SearchOutlined,
-  SortAscendingOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  EyeOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Card,
-  DatePicker,
-  Divider,
-  Empty,
-  Input,
-  List,
-  Pagination,
-  Select,
-  Space,
-  Spin,
-  Typography,
-} from 'antd';
 import dayjs from 'dayjs';
-import SessionCard from './SessionCard';
+import DataTable from '@/components/common/DataTable';
+import SessionCard from '@/components/sessions/SessionCard';
 
-const { Title, Text } = Typography;
-const { Option } = Select;
-const { RangePicker } = DatePicker;
-
-const SessionsList = ({
+const SessionsDataTable = ({
   sessions = [],
   loading = false,
   userType = 'client', // 'client', 'consultant', 'admin'
   onViewDetails,
   onSendMessage,
   onCancel,
-  onEdit,
   onStatusChange,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
-  const [searchText, setSearchText] = useState('');
-  const [dateRange, setDateRange] = useState(null);
-  const [statusFilter, setStatusFilter] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState('date_asc');
+  const [filteredSessions, setFilteredSessions] = useState(sessions);
 
-  // فیلتر کردن جلسات
-  const getFilteredSessions = () => {
-    let filtered = [...sessions];
+  // تعریف فیلترها
+  const filterOptions = [
+    {
+      key: 'search',
+      type: 'text',
+      label:
+        userType === 'client'
+          ? 'جستجو در نام مشاوران'
+          : userType === 'consultant'
+            ? 'جستجو در نام مراجعان'
+            : 'جستجو در نام مشاوران یا مراجعان',
+      placeholder: 'نام را وارد کنید',
+    },
+    {
+      key: 'dateRange',
+      type: 'dateRange',
+      label: 'بازه زمانی',
+    },
+    {
+      key: 'status',
+      type: 'select',
+      label: 'وضعیت جلسه',
+      options: [
+        { value: 'pending', label: 'در انتظار تأیید' },
+        { value: 'confirmed', label: 'تأیید شده' },
+        { value: 'completed', label: 'برگزار شده' },
+        { value: 'cancelled', label: 'لغو شده' },
+      ],
+    },
+  ];
 
-    // فیلتر بر اساس متن جستجو
-    if (searchText) {
-      filtered = filtered.filter((session) => {
-        const searchIn =
-          userType === 'client'
-            ? session.consultantName
-            : userType === 'consultant'
-              ? session.clientName
-              : `${session.consultantName} ${session.clientName}`; // admin can search both
+  // تعریف گزینه‌های مرتب‌سازی
+  const sortOptions = [
+    {
+      key: 'date_asc',
+      label: 'تاریخ (صعودی)',
+    },
+    {
+      key: 'date_desc',
+      label: 'تاریخ (نزولی)',
+    },
+  ];
 
-        return searchIn.toLowerCase().includes(searchText.toLowerCase());
-      });
+  // تعریف ستون‌ها
+  const columns = [
+    {
+      title: userType === 'client' ? 'مشاور' : 'مراجع',
+      dataIndex: userType === 'client' ? 'consultantName' : 'clientName',
+      key: 'name',
+      render: (text, record) => (
+        <SessionCard
+          session={record}
+          type={userType}
+          onViewDetails={onViewDetails}
+        />
+      ),
+    },
+  ];
+
+  // تعریف اکشن‌ها
+  const rowActions = [
+    {
+      key: 'view',
+      label: 'جزئیات',
+      icon: <EyeOutlined />,
+      onClick: onViewDetails,
+    },
+    {
+      key: 'message',
+      label: 'ارسال پیام',
+      icon: <MessageOutlined />,
+      onClick: onSendMessage,
+      hide: !(
+        userType === 'consultant' &&
+        ['confirmed', 'pending'].includes(sessions.status) &&
+        onSendMessage
+      ),
+    },
+    {
+      key: 'cancel',
+      label: 'لغو جلسه',
+      icon: <CloseCircleOutlined />,
+      onClick: onCancel,
+      danger: true,
+      hide:
+        userType !== 'client' ||
+        ['completed', 'cancelled'].includes(sessions.status),
+    },
+    {
+      key: 'status',
+      label: (session) =>
+        session.status === 'confirmed' ? 'تکمیل جلسه' : 'تغییر وضعیت',
+      icon: <CheckCircleOutlined />,
+      onClick: onStatusChange,
+      hide:
+        userType !== 'consultant' ||
+        ['cancelled', 'completed'].includes(sessions.status),
+    },
+  ];
+
+  // هندل فیلتر
+  const handleFilter = (filters) => {
+    let result = [...sessions];
+
+    // فیلتر جستجو
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      result = result.filter((session) =>
+        (userType === 'client' ? session.consultantName : session.clientName)
+          .toLowerCase()
+          .includes(searchLower),
+      );
     }
 
-    // فیلتر بر اساس وضعیت
-    if (statusFilter) {
-      filtered = filtered.filter((session) => session.status === statusFilter);
-    }
-
-    // فیلتر بر اساس بازه زمانی
-    if (dateRange && dateRange[0] && dateRange[1]) {
-      filtered = filtered.filter((session) => {
+    // فیلتر بازه زمانی
+    if (filters.dateRange && filters.dateRange[0] && filters.dateRange[1]) {
+      result = result.filter((session) => {
         const sessionDate = dayjs(session.date);
         return (
-          sessionDate.isAfter(dateRange[0]) &&
-          sessionDate.isBefore(dateRange[1])
+          sessionDate.isAfter(filters.dateRange[0]) &&
+          sessionDate.isBefore(filters.dateRange[1])
         );
       });
     }
 
-    // مرتب‌سازی
-    filtered.sort((a, b) => {
+    // فیلتر وضعیت
+    if (filters.status) {
+      result = result.filter((session) => session.status === filters.status);
+    }
+
+    setFilteredSessions(result);
+    return result;
+  };
+
+  // هندل مرتب‌سازی
+  const handleSort = (sort) => {
+    const sortedSessions = [...filteredSessions].sort((a, b) => {
       const dateA = dayjs(`${a.date} ${a.time}`);
       const dateB = dayjs(`${b.date} ${b.time}`);
 
-      switch (sortBy) {
-        case 'date_asc':
-          return dateA.diff(dateB);
-        case 'date_desc':
-          return dateB.diff(dateA);
-        default:
-          return 0;
-      }
+      return sort.key === 'date_asc' ? dateA.diff(dateB) : dateB.diff(dateA);
     });
 
-    return filtered;
+    setFilteredSessions(sortedSessions);
+    return sortedSessions;
   };
-
-  const filteredSessions = getFilteredSessions();
-
-  // محتوای صفحه فعلی
-  const currentPageData = filteredSessions.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
-
-  // خالی کردن فیلترها
-  const clearFilters = () => {
-    setSearchText('');
-    setDateRange(null);
-    setStatusFilter(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="py-16 text-center">
-        <Spin size="large" />
-        <div className="mt-4">در حال بارگیری جلسات...</div>
-      </div>
-    );
-  }
-
-  if (sessions.length === 0) {
-    return (
-      <Empty
-        description="هیچ جلسه‌ای یافت نشد"
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-      />
-    );
-  }
 
   return (
-    <div className="sessions-list">
-      <Card className="mb-4">
-        <div className="flex flex-wrap items-center justify-between">
-          <div className="mb-4 w-full md:mb-0 md:w-1/2">
-            <Input
-              placeholder={
-                userType === 'client'
-                  ? 'جستجو در نام مشاوران...'
-                  : userType === 'consultant'
-                    ? 'جستجو در نام مراجعان...'
-                    : 'جستجو در نام مشاوران یا مراجعان...'
-              }
-              prefix={<SearchOutlined />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              allowClear
-            />
-          </div>
-
-          <div>
-            <Button
-              type="default"
-              onClick={() => setShowFilters(!showFilters)}
-              icon={<FilterOutlined />}
-            >
-              {showFilters ? 'پنهان کردن فیلترها' : 'فیلترها'}
-            </Button>
-            <Select
-              placeholder="مرتب‌سازی"
-              value={sortBy}
-              onChange={setSortBy}
-              style={{ width: 130, marginRight: 8 }}
-            >
-              <Option value="date_asc">تاریخ (صعودی)</Option>
-              <Option value="date_desc">تاریخ (نزولی)</Option>
-            </Select>
-          </div>
-        </div>
-
-        {showFilters && (
-          <div className="mt-4 border-t pt-4">
-            <div className="flex flex-wrap gap-4">
-              <div className="w-full md:w-auto">
-                <Text className="mb-1 block">تاریخ:</Text>
-                <RangePicker
-                  value={dateRange}
-                  onChange={setDateRange}
-                  format="YYYY/MM/DD"
-                  placeholder={['از تاریخ', 'تا تاریخ']}
-                  allowClear
-                />
-              </div>
-
-              <div className="w-full md:w-auto">
-                <Text className="mb-1 block">وضعیت:</Text>
-                <Select
-                  placeholder="انتخاب وضعیت"
-                  value={statusFilter}
-                  onChange={setStatusFilter}
-                  style={{ width: 150 }}
-                  allowClear
-                >
-                  <Option value="pending">در انتظار تأیید</Option>
-                  <Option value="confirmed">تأیید شده</Option>
-                  <Option value="completed">برگزار شده</Option>
-                  <Option value="cancelled">لغو شده</Option>
-                </Select>
-              </div>
-
-              <div className="flex w-full items-end md:w-auto">
-                <Button onClick={clearFilters}>پاکسازی فیلترها</Button>
-              </div>
-            </div>
-          </div>
-        )}
-      </Card>
-
-      {filteredSessions.length === 0 ? (
-        <Empty
-          description="هیچ جلسه‌ای با معیارهای جستجوی شما یافت نشد"
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
-      ) : (
-        <>
-          <List
-            dataSource={currentPageData}
-            renderItem={(session) => (
-              <List.Item key={session.id} className="mb-4 block w-full p-0">
-                <SessionCard
-                  session={session}
-                  type={userType}
-                  onViewDetails={onViewDetails}
-                  onSendMessage={onSendMessage}
-                  onCancel={onCancel}
-                  onEdit={onEdit}
-                  onStatusChange={onStatusChange}
-                />
-              </List.Item>
-            )}
-          />
-
-          <div className="mt-4 flex justify-center">
-            <Pagination
-              current={currentPage}
-              total={filteredSessions.length}
-              pageSize={pageSize}
-              onChange={setCurrentPage}
-              showSizeChanger={false}
-            />
-          </div>
-        </>
-      )}
-    </div>
+    <DataTable
+      dataSource={filteredSessions}
+      columns={columns}
+      rowKey="id"
+      loading={loading}
+      filterOptions={filterOptions}
+      sortOptions={sortOptions}
+      rowActions={rowActions}
+      onFilter={handleFilter}
+      onSort={handleSort}
+      showSearch
+      showFilters
+      pagination={{
+        pageSize: 5,
+        showTotal: (total, range) => `${range[0]}-${range[1]} از ${total} جلسه`,
+      }}
+    />
   );
 };
 
-export default SessionsList;
+export default SessionsDataTable;

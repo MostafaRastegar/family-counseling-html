@@ -1,49 +1,108 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Card,
-  Col,
-  Divider,
-  Empty,
-  Input,
-  Rate,
-  Row,
-  Select,
-  Tag,
-  Typography,
-} from 'antd';
+import { StarOutlined } from '@ant-design/icons';
+import { Col, Empty, Row, Typography } from 'antd';
+import FilterBar from '@/components/common/FilterBar';
 import ConsultantCard from '@/components/consultants/ConsultantCard';
-import ConsultantFilters from '@/components/consultants/ConsultantFilters';
 import { consultants } from '@/mocks/consultants';
 
-// داده‌های نمونه
-
 const { Title, Paragraph } = Typography;
-const { Option } = Select;
 
 export default function ConsultantsList() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpecialties, setSelectedSpecialties] = useState([]);
-  const [showFilters, setShowFilters] = useState(false);
+  const [filteredConsultants, setFilteredConsultants] = useState(consultants);
 
-  // فیلتر کردن مشاوران بر اساس جستجو و تخصص‌ها
-  const filteredConsultants = consultants.filter((consultant) => {
-    const matchesSearch =
-      !searchQuery ||
-      consultant.name.includes(searchQuery) ||
-      consultant.bio.includes(searchQuery);
+  // تعریف فیلترها
+  const filterOptions = [
+    {
+      key: 'search',
+      type: 'text',
+      label: 'جستجو',
+      placeholder: 'جستجوی نام مشاور یا تخصص',
+    },
+    {
+      key: 'specialties',
+      type: 'select',
+      label: 'تخصص‌ها',
+      mode: 'multiple',
+      options: [
+        { value: 'مشاوره خانواده', label: 'مشاوره خانواده' },
+        { value: 'روابط زناشویی', label: 'روابط زناشویی' },
+        { value: 'فرزندپروری', label: 'فرزندپروری' },
+        { value: 'مشاوره تحصیلی', label: 'مشاوره تحصیلی' },
+        { value: 'مشاوره قبل از ازدواج', label: 'مشاوره قبل از ازدواج' },
+      ],
+    },
+    {
+      key: 'rating',
+      type: 'select',
+      label: 'امتیاز',
+      options: [
+        { value: '4', label: '4 ستاره و بالاتر' },
+        { value: '3', label: '3 ستاره و بالاتر' },
+      ],
+    },
+  ];
 
-    const matchesSpecialties =
-      selectedSpecialties.length === 0 ||
-      selectedSpecialties.some((s) => consultant.specialties.includes(s));
+  // تعریف گزینه‌های مرتب‌سازی
+  const sortOptions = [
+    {
+      key: 'rating_desc',
+      label: 'بالاترین امتیاز',
+      icon: <StarOutlined />,
+    },
+    {
+      key: 'rating_asc',
+      label: 'پایین‌ترین امتیاز',
+      icon: <StarOutlined className="rotate-180" />,
+    },
+  ];
 
-    return matchesSearch && matchesSpecialties;
-  });
+  // هندل فیلتر و جستجو
+  const handleFilter = (filters) => {
+    let result = [...consultants];
+
+    // فیلتر جستجو
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      result = result.filter(
+        (consultant) =>
+          consultant.name.toLowerCase().includes(searchLower) ||
+          consultant.specialties.some((specialty) =>
+            specialty.toLowerCase().includes(searchLower),
+          ),
+      );
+    }
+
+    // فیلتر تخصص‌ها
+    if (filters.specialties && filters.specialties.length > 0) {
+      result = result.filter((consultant) =>
+        consultant.specialties.some((specialty) =>
+          filters.specialties.includes(specialty),
+        ),
+      );
+    }
+
+    // فیلتر امتیاز
+    if (filters.rating) {
+      result = result.filter(
+        (consultant) => consultant.rating >= parseFloat(filters.rating),
+      );
+    }
+
+    setFilteredConsultants(result);
+  };
+
+  // هندل مرتب‌سازی
+  const handleSort = (sort) => {
+    const sortedConsultants = [...filteredConsultants].sort((a, b) => {
+      return sort.key === 'rating_desc'
+        ? b.rating - a.rating
+        : a.rating - b.rating;
+    });
+
+    setFilteredConsultants(sortedConsultants);
+  };
 
   return (
     <div className="container mx-auto">
@@ -52,37 +111,19 @@ export default function ConsultantsList() {
         از بین مشاوران متخصص ما، فردی که متناسب با نیازهای شماست را انتخاب کنید.
       </Paragraph>
 
-      {/* جستجو و فیلترها */}
-      <Card className="mb-8">
-        <div className="mb-4">
-          <Input
-            placeholder="جستجوی نام مشاور یا تخصص"
-            prefix={<SearchOutlined />}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            size="large"
-          />
-        </div>
+      <FilterBar
+        title="لیست مشاوران"
+        filterOptions={filterOptions}
+        sortOptions={sortOptions}
+        onFilter={handleFilter}
+        onSort={handleSort}
+        showSearch
+        showFilters
+        showSort
+      />
 
-        <Button
-          type="link"
-          icon={<FilterOutlined />}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          {showFilters ? 'پنهان کردن فیلترها' : 'نمایش فیلترها'}
-        </Button>
-
-        {showFilters && (
-          <ConsultantFilters
-            selectedSpecialties={selectedSpecialties}
-            setSelectedSpecialties={setSelectedSpecialties}
-          />
-        )}
-      </Card>
-
-      {/* لیست مشاوران */}
       {filteredConsultants.length > 0 ? (
-        <Row gutter={[16, 16]}>
+        <Row gutter={[16, 16]} className="mt-4">
           {filteredConsultants.map((consultant) => (
             <Col xs={24} md={12} lg={8} key={consultant.id}>
               <ConsultantCard consultant={consultant} />
@@ -92,6 +133,7 @@ export default function ConsultantsList() {
       ) : (
         <Empty
           description="هیچ مشاوری با معیارهای جستجوی شما یافت نشد."
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
           className="my-16"
         />
       )}
