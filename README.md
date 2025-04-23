@@ -1,336 +1,188 @@
-## mr-next-ddd
+# سامانه مشاوره خانواده - مستندات توسعه فرانت‌اند
 
-A real-world `DDD` implementation project comprises the same phases as any other software development project. These phases include:
+## معرفی
+این مستندات برای توسعه فرانت‌اند سامانه مشاوره خانواده تهیه شده است. هدف از این پروژه، ایجاد یک پلتفرم آنلاین برای ارتباط مراجعان با مشاوران خانواده جهت دریافت مشاوره تخصصی است.
 
-Refine and refactor the domain model based on the design and development `(Continuous Integration (CI) of model concepts)`.
-Repeat the above steps using the updated domain model `(CI of domain implementation)`.
-An agile software development methodology is a great fit here because agile methodologies focus on the delivery of business value just like DDD focuses on the alignment of software system with business model. Also, using SCRUM `(for project management)` and XP `(for software development purposes)` methodologies is a good combination for managing a DDD implementation project.
+## استک و تکنولوژی‌ها
+- **فریم‌ورک**: Next.js با App Router
+- **کامپوننت‌ها**: Ant Design
+- **استایل‌دهی**: Tailwind CSS
+- **تقویم**: FullCalendar
+- **مدیریت تاریخ**: Day.js
+- **زبان برنامه‌نویسی**: TypeScript
+- **جهت متن**: RTL (راست به چپ)
+- **زبان**: فقط فارسی
 
-# Folder structures:
+## قرارداد AAA
+برای توسعه این پروژه، قرارداد AAA تنظیم شده است که طبق آن تمامی کامپوننت‌ها و صفحات باید بر اساس اصول زیر پیاده‌سازی شوند:
+- Clean Code
+- اصول SOLID
+- اصل DRY (Don't Repeat Yourself)
+- ساده‌نویسی و پرهیز از کدهای حجیم و پیچیده
 
-```
-root
-├─ src
-│ ├─ app
-│ ├─ constants
-│ │ └─ endpoints.ts
-│ ├─ modules
-│   └─ user
-│      ├─ domains
-│      │ ├─ models
-│      │ │  └─ User.ts
-│      │ └─ IUserRepository.ts
-│      │ └─ IUserService.ts
-│      │
-│      ├─ User.presentation.ts
-│      ├─ User.repository.ts
-│      └─ User.service.ts
-|
-├─ .eslintrc.json
-├─ .gitignore
-├─ package.json
-└─ tsconfig.json
+## اهداف و محدودیت‌ها
+- **تمرکز بر UI**: هدف اصلی ایجاد کامپوننت‌های UI است.
+- **بدون اتصال به API**: فعلاً نیازی به اتصال به API نیست و داده‌های نمونه (mock) استفاده می‌شود.
+- **ساده‌سازی منطق**: از منطق‌های پیچیده که پیاده‌سازی را دشوار می‌کند، خودداری می‌شود.
+- **تم روشن**: فقط تم روشن پیاده‌سازی می‌شود.
+- **کنترل دسترسی ساده**: پیاده‌سازی ساده کنترل دسترسی بر اساس نقش‌های کاربری.
 
+## ساختار فولدربندی
 
 ```
-
-# Domain Layer
-
-The domain layer contains the business logic of the application.
-It includes the domain model `(models)` and the `repository, service` interface . <br/>
-The `domain model` encapsulates the business rules and the `repository` interface defines the contract for interacting with the data source.
-
-```
-├─ domains
-│ ├─ models
-│ │  └─ User.ts
-│ └─ IUserRepository.ts
-│ └─ IUserService.ts
-```
-
-- user/domains/models/User.ts
-
-```ts
-export interface User {
-  email: string;
-  username: string;
-  bio?: string;
-  image?: string;
-  token: string;
-}
-```
-
-- user/domains/IUserRepository.ts
-
-```ts
-export interface IUserRepository {
-  update(body: UserUpdateParams): Promise<ResponseObject<UserUpdate>>;
-  findByToken(): Promise<ResponseObject<UserCurrent>>;
-  findByEmailAndPassword(
-    body: UserLoginParams,
-  ): Promise<ResponseObject<UserCurrent>>;
-  create(body: UserCreateParams): Promise<ResponseObject<UserCreate>>;
-}
+src/
+├── app/                       # App Router
+│   ├── (auth)/                # صفحات مربوط به احراز هویت
+│   ├── (dashboard)/           # صفحات پنل کاربری
+│   │   ├── admin/             # بخش ادمین
+│   │   ├── consultant/        # بخش مشاوران
+│   │   └── client/            # بخش مراجعان
+│   ├── api/                   # API Routes
+│   └── layout.tsx             # Root Layout
+├── components/
+│   ├── layouts/               # لایوت‌های اصلی
+│   │   ├── MainLayout.tsx
+│   │   ├── AuthLayout.tsx
+│   │   ├── DashboardLayout.tsx
+│   │   └── AdminLayout.tsx
+│   ├── ui/                    # کامپوننت‌های پایه UI
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── PageHeader/
+│   │   ├── Card/
+│   │   ├── states/
+│   │   ├── StatusBadge/
+│   │   ├── forms/
+│   │   └── modals/
+│   ├── auth/                  # کامپوننت‌های احراز هویت (آینده)
+│   ├── users/                 # کامپوننت‌های مربوط به کاربران (آینده)
+│   ├── consultants/           # کامپوننت‌های مربوط به مشاوران (آینده)
+│   ├── clients/               # کامپوننت‌های مربوط به مراجعان (آینده)
+│   ├── sessions/              # کامپوننت‌های مربوط به جلسات (آینده)
+│   └── shared/                # کامپوننت‌های مشترک (آینده)
+├── mock/                      # داده‌های نمونه
+├── types/                     # تایپ‌های TypeScript (آینده)
+└── styles/                    # استایل‌های سراسری
 ```
 
-- user/domains/IUserService.ts
+## کامپوننت‌های پیاده‌سازی شده
 
-```ts
-import { IUserRepository } from './IUserRepository';
+### 1. لایوت‌ها
+- **MainLayout**: لایوت RTL اصلی برای صفحات عمومی
+- **AuthLayout**: لایوت ساده و مینیمال برای صفحات ورود و ثبت‌نام
+- **DashboardLayout**: لایوت پنل کاربری با Sider و منوهای متناسب با نقش کاربر
+- **AdminLayout**: لایوت مخصوص پنل ادمین
 
-export interface IUserService {
-  login: IUserRepository['findByEmailAndPassword'];
-  register: IUserRepository['create'];
-  update: IUserRepository['update'];
-  getCurrentUser: IUserRepository['findByToken'];
-}
-```
+### 2. کامپوننت‌های UI پایه
+- **Header**: هدر اصلی با لوگو، منو و بخش کاربر
+- **Footer**: فوتر با لینک‌های مهم و اطلاعات تماس
+- **Sidebar**: ساید‌بار داشبورد با منوهای داینامیک بر اساس نقش کاربر
+- **PageHeader**: سربرگ صفحات با عنوان، توضیحات و دکمه‌های اقدام
 
-# Infrastructure Layer
+### 3. کامپوننت‌های کارت
+- **BaseCard**: کارت پایه با قابلیت نمایش حالت‌های مختلف
+- **ConsultantCard**: کارت نمایش اطلاعات مشاور
+- **SessionCard**: کارت نمایش اطلاعات جلسه
+- **ReviewCard**: کارت نمایش نظرات
+- **StatCard**: کارت نمایش آمار
 
-The infrastructure layer contains the infrastructure services `(infrastructure)` and the API repository `(restFull, graphQl,...)`.<br/>
-The infrastructure services handle the technical concerns of the application, such as database access and network communication.<br/>
-The `API repository interacts` with the API and maps the data to the domain model.
+### 4. کامپوننت‌های وضعیت
+- **EmptyState**: نمایش حالت خالی برای لیست‌ها و جداول
+- **LoadingState**: نمایش وضعیت بارگذاری
+- **ErrorState**: نمایش خطا در کامپوننت‌ها
 
-```
-└─ user
-  ├─ ...
-  ├─ User.repository.ts
-```
+### 5. کامپوننت‌های نشان وضعیت
+- **StatusBadge**: نشان‌های وضعیت جلسات، پرداخت و احراز هویت
 
-- user/User.repository.ts
+### 6. کامپوننت‌های فرم
+- **FormSection**: بخش‌بندی فرم‌های بزرگ و پیچیده
+- **FormActions**: دکمه‌های اقدام فرم (ذخیره، انصراف و...)
 
-```ts
-function UserRepository(): IUserRepository {
-  return {
-    findByToken: () =>
-      serviceHandler<UserCurrent>(() =>
-        request.get(endpoints.USERS.GET_USER()),
-      ),
+### 7. کامپوننت‌های مودال
+- **ConfirmDialog**: دیالوگ تایید برای عملیات مهم
+- **FormModal**: مودال حاوی فرم
+- **SuccessModal**: مودال نمایش عملیات موفق
 
-    findByEmailAndPassword: (body: UserLoginParams) =>
-      serviceHandler<UserCurrent>(() =>
-        requestWithoutAuth.post(endpoints.USERS.POST_USERS_LOGIN(), body),
-      ),
-    update: (body: UserUpdateParams) =>
-      serviceHandler<UserUpdate>(() =>
-        request.put(endpoints.USERS.PUT_USER(), body),
-      ),
+## مدیریت فرم‌ها
+- استفاده از **Ant Design Form** برای مدیریت فرم‌ها
+- استفاده از الگوهای استاندارد اعتبارسنجی
+- نمایش پیام‌های راهنما به صورت یکپارچه
 
-    create: (body: UserCreateParams) =>
-      serviceHandler<UserCreate>(() =>
-        requestWithoutAuth.post(endpoints.USERS.POST_USERS(), body),
-      ),
-  };
-}
-```
+## مدیریت خطا و لودینگ
+- استفاده از کامپوننت‌های `ErrorState` و `LoadingState` برای نمایش وضعیت
+- نمایش نوتیفیکیشن‌های مناسب برای خطاها و موفقیت‌ها
 
-# Application Layer
+## استراتژی توسعه
+- **Component-First**: توسعه کامپوننت‌ها با داده‌های نمونه
+- **ساده‌سازی**: تمرکز بر ساده‌سازی UI و اجتناب از پیچیدگی‌های غیرضروری
+- **تکامل تدریجی**: افزودن ویژگی‌ها گام به گام
 
-The application layer contains the application services `(services)` and the data transfer objects `(dtos)`.<br/>
-The application services encapsulate the `use-cases` of the application and the data transfer objects shape the data for the client-side.
+## داده‌های نمونه (Mock)
+برای توسعه UI، داده‌های نمونه در فولدر `mock` قرار داده شده‌اند که شامل موارد زیر است:
+- users.js: اطلاعات کاربران
+- consultants.js: اطلاعات مشاوران
+- clients.js: اطلاعات مراجعان
+- availabilities.js: زمان‌های در دسترس مشاوران
+- sessions.js: جلسات مشاوره
+- reviews.js: نظرات مراجعان
+- messages.js: پیام‌های ارسال شده
+- dashboard-stats.js: آمار داشبورد ادمین
+- specialties.js: لیست تخصص‌ها
+- auth.js: داده‌های احراز هویت
 
-```
-└─ user
-  ├─ ...
-  ├─ User.service.ts
-```
+## تنظیمات RTL و استایل‌دهی
+- تمام کامپوننت‌ها با پشتیبانی کامل از RTL پیاده‌سازی شده‌اند
+- استفاده از `dir="rtl"` در لایوت اصلی
+- تنظیم `direction: "rtl"` در کانفیگ Ant Design
+- استفاده از فونت فارسی Vazirmatn
+- تنظیم Tailwind برای رنگ‌های اصلی و فرعی
 
-- user/User.service.ts
+## مراحل بعدی توسعه
 
-```ts
-function UserService(
-  UserRepository: IUserRepository,
-  redirect?: Function,
-): IUserService {
-): IUserService {
-  return {
-    getCurrentUser: () => serviceHandler(UserRepository.findByToken),
+### مرحله 1: کامپوننت‌های احراز هویت
+- LoginForm
+- RegisterForm
+- ForgotPasswordForm
 
-    login: (body: UserLoginParams) =>
-      serviceHandler(() => UserRepository.findByEmailAndPassword(body), {
-        onSuccess: (response) => {
-          const token = response?.data?.user?.token;
-          if (token) {
-            cookies.set('access_token', token);
-          }
-        },
-      }),
+### مرحله 2: پروفایل کاربری
+- ProfileHeader
+- ProfileForm
+- PasswordChangeForm
+- AvatarUpload
 
-    update: (body: UserUpdateParams) =>
-      serviceHandler(() => UserRepository.update(body)),
+### مرحله 3: کامپوننت‌های مشاوران
+- ConsultantProfileForm
+- SpecialtiesSelect
+- AvailabilityCalendar
+- AvailabilityForm
 
-    register: (body: UserCreateParams) =>
-      serviceHandler(() => UserRepository.create(body), {
-        onSuccess: (response) => {
-          const token = response?.data.user?.token;
-          if (cookies && token && redirect) {
-            cookies.set('access_token', token);
-            redirect('/');
-          }
-          return response;
-        },
-      }),
-  };
-}
-```
+### مرحله 4: کامپوننت‌های مراجعان
+- ConsultantSearchFilter
+- ConsultantsList
+- BookingCalendar
+- BookingForm
 
-# Presentation Layer
+### مرحله 5: مدیریت جلسات و نظرات
+- SessionsList
+- SessionDetail
+- ReviewForm
+- ReviewsList
 
-The presentation layer contains the controllers `(presentation)` and the query library `(reactQuery, SWR, ...)`. <br/>
-The controllers handle the user interactions and delegate the work to the application layer. <br/>
-`For example:` the `React Query` handles the state management and the data fetching for the React components.
+### مرحله 6: پنل ادمین
+- StatCards
+- UsersTable
+- PendingConsultantsTable
+- ReportCharts
 
-```
-└─ user
-  ├─ ...
-  ├─ User.presentation.ts
+## نکات مهم
+1. تمام کامپوننت‌ها باید TypeScript باشند
+2. رعایت اصول Component-Based در توسعه
+3. پرهیز از استفاده کامنت‌های فارسی در کد
+4. تست هر کامپوننت قبل از ادامه به مرحله بعدی
+5. استفاده از داده‌های نمونه برای توسعه UI
+6. رعایت اصول Responsive Design
 
-```
+---
 
-- user/User.presentation.ts
-
-```ts
-const userService = UserService(UserRepository());
-
-export function UserPresentation() {
-  return {
-    useGetCurrentUser: () =>
-      useQuery({
-        queryKey: ['user'],
-        queryFn: () => userService.getCurrentUser(),
-      }),
-
-    useUserLogin: () => {
-      const router = useRouter();
-      const searchParams = useSearchParams();
-      return useMutation({
-        mutationFn: () => {
-          const rawFormData: UserLoginParams = {
-            user: {
-              email: '{{EMAIL}}',
-
-              password: '{{PASSWORD}}',
-            },
-          };
-          return userService.login(rawFormData);
-        },
-        onSuccess(response) {
-          console.log('onSuccess :>> ', response);
-          const nextUrl = searchParams.get('next');
-          router.push(nextUrl ?? '/');
-        },
-        onError(error) {
-          console.log('error :>> ', error);
-        },
-      });
-    },
-}
-```
-
-## CLI Tools
-
-This project utilizes `npm run cli` to automate the generation of modules, app routers, and endpoints in a structured manner. It helps streamline the development process by providing templates and predefined structures for common tasks.
-
-## Usage
-
-After run `npm run cli`:
-
-### Generating Modules by `module`
-
-Module Name: Enter the name of the module you want to create.
-Generated Files:
-
-```
-src/modules/{moduleName}/domains/I{ModuleName}Service.ts
-src/modules/{moduleName}/domains/models/{ModuleName}.ts
-src/modules/{moduleName}/{ModuleName}.service.ts
-src/modules/{moduleName}/{ModuleName}.presentation.ts
-```
-
-### Generating App Router `app-router`
-
-#### Prompts:
-
-- Router Path: Specify the path for the app router.
-- Router File Name: Provide a name for the router file.
-- Module Name: Select the module to which you want to add the router.
-
-#### Generated Files:
-
-```
-src/app/[locale]/dashboard/{routerPath}/page.tsx
-src/app/[locale]/dashboard/{routerPath}/_viewModule/{partialName}.context.tsx
-src/app/[locale]/dashboard/{routerPath}/_viewModule/{partialName}.view.tsx
-src/app/[locale]/dashboard/{routerPath}/_viewModule/{partialName}.vm.ts
-```
-
-### Adding Endpoints `app-endpoint`
-
-#### Prompts:
-
-- Endpoint Name: Enter the name of the endpoint you want to add.
-
-#### Modification:
-
-The endpoint will be added to src/constants/endpoints.ts with the following structure:
-
-#### Generated Files:
-
-```
-{charToUpper moduleName}: {
-  GET_{charToUpper moduleName}: () => `${HOST_URL_API}/{moduleName}/`,
-  POST_{charToUpper moduleName}: () => `${HOST_URL_API}/{moduleName}/`,
-  GET_{charToUpper moduleName}_ID: (id: string) => `${HOST_URL_API}/{moduleName}/${id}/`,
-  PUT_{charToUpper moduleName}_ID: (id: string) => `${HOST_URL_API}/{moduleName}/${id}/`,
-  DELETE_{charToUpper moduleName}_ID: (id: string) => `${HOST_URL_API}/{moduleName}/${id}/`,
-},
-```
-
-## Getting Started
-
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
-
-First, run the development server:
-
-```bash
-# install dependencies
-npm i
-
-# run develop mode
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000/login](http://localhost:3000/login) with your browser to see the result.
-
-- username: {{EMAIL}}
-- password: {{PASSWORD}}
-
-## CLI
-
-You can use modules cli for generate DDD api folders and files in `/modules` folder
-
-```bash
-npm run route
-```
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+با این README، می‌توانیم در چت‌های بعدی کار را با همان کیفیت و ساختار ادامه دهیم و مراحل بعدی توسعه را طبق برنامه پیش ببریم.
