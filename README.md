@@ -140,12 +140,6 @@ src/
 
 ## مراحل بعدی توسعه
 
-### مرحله 4: کامپوننت‌های مراجعان
-- ConsultantSearchFilter
-- ConsultantsList
-- BookingCalendar
-- BookingForm
-
 ### مرحله 5: مدیریت جلسات و نظرات
 - SessionsList
 - SessionDetail

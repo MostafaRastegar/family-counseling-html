@@ -1,12 +1,7 @@
 'use client';
 
-import Sidebar from '@/components/common/Sidebar';
+import DashboardLayoutComponent from '@/components/layouts/DashboardLayout';
 
-export default function DashboardLayout({ children }) {
-  return (
-    <div className="flex">
-      <Sidebar />
-      <div className="flex-1 p-6">{children}</div>
-    </div>
-  );
+export default function DashboardLayout({ children }: any) {
+  return <DashboardLayoutComponent>{children}</DashboardLayoutComponent>;
 }

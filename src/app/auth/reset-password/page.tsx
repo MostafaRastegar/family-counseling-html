@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
-import AuthLayout from '@/components/layouts/AuthLayout';
 import ResetPasswordForm from '@/components/auth/reset-password-form';
+import AuthLayout from '@/components/layouts/AuthLayout';
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();

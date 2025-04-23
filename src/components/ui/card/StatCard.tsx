@@ -18,6 +18,7 @@ interface StatCardProps {
   };
   loading?: boolean;
   error?: string;
+  className?: string;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -30,6 +31,7 @@ const StatCard: React.FC<StatCardProps> = ({
   trend,
   loading = false,
   error,
+  className,
 }) => {
   if (loading || error) {
     return <BaseCard loading={loading} error={error} />;
@@ -57,7 +59,7 @@ const StatCard: React.FC<StatCardProps> = ({
   };
 
   return (
-    <BaseCard>
+    <BaseCard className={className}>
       <div className="mb-4 flex items-center justify-between">
         <Text strong className="text-gray-600">
           {title}
