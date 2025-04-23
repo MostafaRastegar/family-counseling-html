@@ -140,23 +140,6 @@ src/
 
 ## مراحل بعدی توسعه
 
-### مرحله 1: کامپوننت‌های احراز هویت
-- LoginForm
-- RegisterForm
-- ForgotPasswordForm
-
-### مرحله 2: پروفایل کاربری
-- ProfileHeader
-- ProfileForm
-- PasswordChangeForm
-- AvatarUpload
-
-### مرحله 3: کامپوننت‌های مشاوران
-- ConsultantProfileForm
-- SpecialtiesSelect
-- AvailabilityCalendar
-- AvailabilityForm
-
 ### مرحله 4: کامپوننت‌های مراجعان
 - ConsultantSearchFilter
 - ConsultantsList
