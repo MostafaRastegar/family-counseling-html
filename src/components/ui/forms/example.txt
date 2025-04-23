@@ -1,0 +1,94 @@
+import React from 'react';
+import { Form, Input, Select, DatePicker } from 'antd';
+import { FormSection, FormActions } from '@/components/ui/forms';
+
+const { Option } = Select;
+
+const ProfileForm: React.FC = () => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = async (values: any) => {
+    setLoading(true);
+    try {
+      // در اینجا عملیات ارسال فرم انجام می‌شود
+      console.log('Submitted values:', values);
+      // نمایش پیام موفقیت
+    } catch (error) {
+      // نمایش پیام خطا
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    form.resetFields();
+  };
+
+  const handleCancel = () => {
+    // بازگشت به صفحه قبل یا بستن فرم
+  };
+
+  return (
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleSubmit}
+      id="profile-form"
+    >
+      <FormSection
+        title="اطلاعات شخصی"
+        description="لطفا اطلاعات شخصی خود را وارد کنید"
+      >
+        <Form.Item
+          name="fullName"
+          label="نام و نام خانوادگی"
+          rules={[{ required: true, message: 'لطفا نام و نام خانوادگی را وارد کنید' }]}
+        >
+          <Input placeholder="نام و نام خانوادگی خود را وارد کنید" />
+        </Form.Item>
+
+        <Form.Item
+          name="email"
+          label="ایمیل"
+          rules={[
+            { required: true, message: 'لطفا ایمیل را وارد کنید' },
+            { type: 'email', message: 'ایمیل وارد شده معتبر نیست' }
+          ]}
+        >
+          <Input placeholder="ایمیل خود را وارد کنید" />
+        </Form.Item>
+      </FormSection>
+
+      <FormSection
+        title="اطلاعات تماس"
+        description="اطلاعات تماس خود را وارد کنید"
+      >
+        <Form.Item
+          name="phoneNumber"
+          label="شماره تلفن"
+          rules={[{ required: true, message: 'لطفا شماره تلفن را وارد کنید' }]}
+        >
+          <Input placeholder="شماره تلفن خود را وارد کنید" />
+        </Form.Item>
+
+        <Form.Item
+          name="address"
+          label="آدرس"
+        >
+          <Input.TextArea rows={3} placeholder="آدرس خود را وارد کنید" />
+        </Form.Item>
+      </FormSection>
+
+      <FormActions
+        loading={loading}
+        onCancel={handleCancel}
+        onReset={handleReset}
+        showReset={true}
+        form="profile-form"
+      />
+    </Form>
+  );
+};
+
+export default ProfileForm;

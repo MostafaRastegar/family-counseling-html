@@ -1,23 +1,77 @@
 export const reviews = [
   {
-    id: 1,
-    consultantId: 1,
-    clientId: 5,
-    clientName: 'فاطمه رضایی',
+    id: 'review-001',
+    consultantId: 'consultant-001',
+    clientId: 'client-002',
+    sessionId: 'session-002',
+    consultant: {
+      id: 'consultant-001',
+      user: {
+        id: 'user-002',
+        fullName: 'دکتر علی محمدی',
+      },
+    },
+    client: {
+      id: 'client-002',
+      user: {
+        id: 'user-005',
+        fullName: 'مریم حسینی',
+      },
+    },
     rating: 5,
     comment:
-      'جلسات مشاوره با دکتر محمدی واقعاً به ما کمک کرد تا مشکلات ارتباطی خود را حل کنیم و رابطه بهتری داشته باشیم.',
-    date: '1401/01/15',
+      'دکتر محمدی بسیار صبور و دلسوز هستند. راهکارهای ایشان به من و همسرم در حل مشکلات ارتباطی‌مان کمک زیادی کرد.',
+    createdAt: '2025-04-20T13:30:00Z',
+    updatedAt: '2025-04-20T13:30:00Z',
   },
   {
-    id: 2,
-    consultantId: 2,
-    clientId: 6,
-    clientName: 'امیر حسینی',
-    rating: 5,
+    id: 'review-002',
+    consultantId: 'consultant-001',
+    clientId: 'client-001',
+    sessionId: 'session-001',
+    consultant: {
+      id: 'consultant-001',
+      user: {
+        id: 'user-002',
+        fullName: 'دکتر علی محمدی',
+      },
+    },
+    client: {
+      id: 'client-001',
+      user: {
+        id: 'user-004',
+        fullName: 'محسن کریمی',
+      },
+    },
+    rating: 4,
     comment:
-      'برای مشکلات رفتاری فرزندم با دکتر احمدی مشورت کردم و نتایج فوق‌العاده‌ای گرفتم. روش‌های تربیتی ایشان بسیار کاربردی و مؤثر بود.',
-    date: '1401/01/10',
+      'جلسه خوبی بود و راهکارهای مفیدی ارائه شد. منتظر نتایج بیشتر در جلسات آینده هستم.',
+    createdAt: '2025-04-15T10:45:00Z',
+    updatedAt: '2025-04-15T10:45:00Z',
   },
-  // اضافه کردن سایر نظرات
+  {
+    id: 'review-003',
+    consultantId: 'consultant-002',
+    clientId: 'client-002',
+    sessionId: 'session-004',
+    consultant: {
+      id: 'consultant-002',
+      user: {
+        id: 'user-003',
+        fullName: 'دکتر سارا رضایی',
+      },
+    },
+    client: {
+      id: 'client-002',
+      user: {
+        id: 'user-005',
+        fullName: 'مریم حسینی',
+      },
+    },
+    rating: 3,
+    comment:
+      'مشاوره خوب بود اما کمی کوتاه به نظر می‌رسید و همه سوالاتم پاسخ داده نشد.',
+    createdAt: '2025-04-18T09:20:00Z',
+    updatedAt: '2025-04-18T09:20:00Z',
+  },
 ];

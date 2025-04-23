@@ -1,0 +1,32 @@
+export const messages = [
+  {
+    id: 'msg-001',
+    recipientId: 'telegram123456',
+    text: 'سلام آقای کریمی. جلسه شما برای فردا ساعت 14:00 تایید شد. لطفا 5 دقیقه قبل از شروع جلسه آماده باشید.',
+    messengerType: 'telegram',
+    sessionId: 'session-001',
+    success: true,
+    messageId: 'telegram_msg_123456789',
+    createdAt: '2025-04-21T11:30:00Z',
+  },
+  {
+    id: 'msg-002',
+    recipientId: 'whatsapp987654',
+    text: 'خانم حسینی عزیز، از حضور شما در جلسه امروز متشکرم. تمرین‌های گفته شده را روزانه انجام دهید و نتایج را یادداشت کنید.',
+    messengerType: 'whatsapp',
+    sessionId: 'session-002',
+    success: true,
+    messageId: 'whatsapp_msg_987654321',
+    createdAt: '2025-04-20T12:15:00Z',
+  },
+  {
+    id: 'msg-003',
+    recipientId: 'telegram654321',
+    text: 'با عرض پوزش، جلسه شما به دلیل مشکل شخصی لغو شد. می‌توانید از طریق سیستم زمان دیگری را انتخاب کنید.',
+    messengerType: 'telegram',
+    sessionId: 'session-004',
+    success: true,
+    messageId: 'telegram_msg_567891234',
+    createdAt: '2025-04-22T08:45:00Z',
+  },
+];

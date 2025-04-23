@@ -1,0 +1,103 @@
+import React, { useState } from 'react';
+import { Button, Form, Input, message } from 'antd';
+import { ConfirmDialog, FormModal, SuccessModal } from '@/components/ui/modals';
+
+const ModalExample: React.FC = () => {
+  // State for different modals
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [formVisible, setFormVisible] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState(null);
+
+  // Handlers for confirm dialog
+  const handleDelete = () => {
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      setConfirmVisible(false);
+      message.success('آیتم با موفقیت حذف شد');
+    }, 1500);
+  };
+
+  // Handlers for form modal
+  const handleFormSubmit = (values: any) => {
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      setFormVisible(false);
+      setFormData(values);
+      setSuccessVisible(true);
+    }, 1500);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Button danger onClick={() => setConfirmVisible(true)}>
+          حذف آیتم
+        </Button>
+        
+        <ConfirmDialog
+          visible={confirmVisible}
+          title="آیا از حذف این آیتم مطمئن هستید؟"
+          content="این عملیات غیرقابل بازگشت است و تمام اطلاعات مرتبط با این آیتم حذف خواهد شد."
+          onCancel={() => setConfirmVisible(false)}
+          onConfirm={handleDelete}
+          confirmLoading={loading}
+          confirmText="بله، حذف شود"
+          type="warning"
+        />
+      </div>
+
+      <div>
+        <Button type="primary" onClick={() => setFormVisible(true)}>
+          ایجاد آیتم جدید
+        </Button>
+        
+        <FormModal
+          title="ایجاد آیتم جدید"
+          visible={formVisible}
+          onCancel={() => setFormVisible(false)}
+          onSubmit={handleFormSubmit}
+          confirmLoading={loading}
+          formId="create-item-form"
+        >
+          <Form.Item
+            name="name"
+            label="نام"
+            rules={[{ required: true, message: 'لطفا نام را وارد کنید' }]}
+          >
+            <Input placeholder="نام آیتم را وارد کنید" />
+          </Form.Item>
+          
+          <Form.Item
+            name="description"
+            label="توضیحات"
+          >
+            <Input.TextArea rows={4} placeholder="توضیحات آیتم را وارد کنید" />
+          </Form.Item>
+        </FormModal>
+      </div>
+
+      <SuccessModal
+        visible={successVisible}
+        onClose={() => setSuccessVisible(false)}
+        title="عملیات با موفقیت انجام شد"
+        message={
+          formData ? (
+            <div>
+              <p>آیتم جدید با مشخصات زیر ایجاد شد:</p>
+              <p><strong>نام:</strong> {formData.name}</p>
+              <p><strong>توضیحات:</strong> {formData.description}</p>
+            </div>
+          ) : 'عملیات با موفقیت انجام شد'
+        }
+      />
+    </div>
+  );
+};
+
+export default ModalExample;
