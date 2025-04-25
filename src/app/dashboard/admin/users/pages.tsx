@@ -2,32 +2,44 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Modal, message, notification } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { 
+  Button, 
+  Card, 
+  Modal, 
+  Typography, 
+  notification,
+  Row,
+  Col
+} from 'antd';
+import { 
+  PlusOutlined,
+  UserAddOutlined,
+  ExclamationCircleOutlined,
+  TeamOutlined,
+  UserOutlined,
+  UserSwitchOutlined
+} from '@ant-design/icons';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import UsersTable from '@/components/admin/UsersTable';
-import UserForm from '@/components/admin/UserForm';
-import UserDetail from '@/components/admin/UserDetail';
-import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
+import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
+import StatCard from '@/components/ui/card/StatCard';
 import { users as mockUsers } from '@/mocks/users';
+
+const { Text } = Typography;
+const { confirm } = Modal;
 
 export default function AdminUsersPage() {
   const router = useRouter();
-  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  
-  // Modal states
-  const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [addModalVisible, setAddModalVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Load users data
+  // بارگذاری داده‌های کاربران
   useEffect(() => {
-    // Simulate API call
+    // شبیه‌سازی درخواست API
     const timer = setTimeout(() => {
       setUsers(mockUsers);
       setLoading(false);
@@ -36,109 +48,92 @@ export default function AdminUsersPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle view user details
+  // رویداد مشاهده جزئیات کاربر
   const handleViewUser = (userId: string) => {
-    const user = users.find(user => user.id === userId);
-    if (user) {
-      setSelectedUser(user);
-      setDetailModalVisible(true);
-    }
+    router.push(`/dashboard/admin/users/${userId}`);
   };
 
-  // Handle edit user
+  // رویداد ویرایش کاربر
   const handleEditUser = (userId: string) => {
-    const user = users.find(user => user.id === userId);
-    if (user) {
-      setSelectedUser(user);
-      setEditModalVisible(true);
-    }
+    router.push(`/dashboard/admin/users/${userId}/edit`);
   };
 
-  // Handle delete user
+  // رویداد حذف کاربر
   const handleDeleteUser = (userId: string) => {
-    const user = users.find(user => user.id === userId);
-    if (user) {
-      setSelectedUser(user);
-      setDeleteModalVisible(true);
+    setUserToDelete(userId);
+    setDeleteConfirmVisible(true);
+  };
+
+  // تایید حذف کاربر
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setDeleteLoading(true);
+
+    try {
+      // شبیه‌سازی درخواست API برای حذف کاربر
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // حذف کاربر از لیست (در حالت واقعی از طریق API انجام می‌شود)
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== userToDelete));
+
+      // نمایش پیام موفقیت
+      notification.success({
+        message: 'حذف کاربر',
+        description: 'کاربر با موفقیت حذف شد.',
+      });
+
+      // بستن دیالوگ تایید
+      setDeleteConfirmVisible(false);
+    } catch (err) {
+      notification.error({
+        message: 'خطا در حذف کاربر',
+        description: 'متأسفانه خطایی در حذف کاربر رخ داده است. لطفا مجددا تلاش کنید.',
+      });
+    } finally {
+      setDeleteLoading(false);
+      setUserToDelete(null);
     }
   };
 
-  // Handle add new user
+  // لغو حذف کاربر
+  const cancelDeleteUser = () => {
+    setDeleteConfirmVisible(false);
+    setUserToDelete(null);
+  };
+
+  // رویداد افزودن کاربر جدید
   const handleAddUser = () => {
-    setSelectedUser(null);
-    setAddModalVisible(true);
+    router.push('/dashboard/admin/users/add');
   };
 
-  // Handle form submit for add/edit
-  const handleFormSubmit = (values: any, isEdit: boolean) => {
-    setActionLoading(true);
+  // محاسبه آمار کاربران
+  const getUserStats = () => {
+    const total = users.length;
+    const admins = users.filter(user => user.role === 'admin').length;
+    const consultants = users.filter(user => user.role === 'consultant').length;
+    const clients = users.filter(user => user.role === 'client').length;
 
-    // Simulate API call
-    setTimeout(() => {
-      let updatedUsers;
-      
-      if (isEdit && selectedUser) {
-        // Update existing user
-        updatedUsers = users.map(user => 
-          user.id === selectedUser.id ? { ...user, ...values } : user
-        );
-        notification.success({
-          message: 'کاربر به‌روزرسانی شد',
-          description: `اطلاعات کاربر ${values.fullName} با موفقیت به‌روزرسانی شد.`,
-        });
-      } else {
-        // Add new user
-        const newUser = {
-          id: `user-${Date.now()}`,
-          ...values,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        updatedUsers = [...users, newUser];
-        notification.success({
-          message: 'کاربر جدید اضافه شد',
-          description: `کاربر ${values.fullName} با موفقیت اضافه شد.`,
-        });
-      }
-
-      setUsers(updatedUsers);
-      setActionLoading(false);
-      setEditModalVisible(false);
-      setAddModalVisible(false);
-    }, 1500);
+    return {
+      total,
+      admins,
+      consultants,
+      clients
+    };
   };
 
-  // Handle confirm user deletion
-  const handleConfirmDelete = () => {
-    if (!selectedUser) return;
-    
-    setActionLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      const updatedUsers = users.filter(user => user.id !== selectedUser.id);
-      setUsers(updatedUsers);
-      
-      notification.success({
-        message: 'کاربر حذف شد',
-        description: `کاربر ${selectedUser.fullName} با موفقیت حذف شد.`,
-      });
-      
-      setActionLoading(false);
-      setDeleteModalVisible(false);
-    }, 1500);
-  };
+  const stats = getUserStats();
 
   return (
     <div className="admin-users-page">
       <DashboardBreadcrumb />
-      
+
       <AdminPageHeader
         title="مدیریت کاربران"
         subtitle="مشاهده، ویرایش و مدیریت کاربران سیستم"
         actions={[
           {
-            key: 'add-user',
+            key: 'add',
             text: 'افزودن کاربر',
             icon: <PlusOutlined />,
             onClick: handleAddUser,
@@ -147,86 +142,65 @@ export default function AdminUsersPage() {
         ]}
       />
 
-      <UsersTable 
-        users={users}
-        loading={loading}
-        onView={handleViewUser}
-        onEdit={handleEditUser}
-        onDelete={handleDeleteUser}
-      />
-
-      {/* User Detail Modal */}
-      <Modal
-        title="مشاهده اطلاعات کاربر"
-        open={detailModalVisible}
-        onCancel={() => setDetailModalVisible(false)}
-        footer={[
-          <Button key="back" onClick={() => setDetailModalVisible(false)}>
-            بستن
-          </Button>,
-          <Button 
-            key="edit" 
-            type="primary" 
-            onClick={() => {
-              setDetailModalVisible(false);
-              setEditModalVisible(true);
-            }}
-          >
-            ویرایش
-          </Button>,
-        ]}
-        width={700}
-      >
-        {selectedUser && <UserDetail user={selectedUser} />}
-      </Modal>
-
-      {/* Edit User Modal */}
-      <Modal
-        title="ویرایش کاربر"
-        open={editModalVisible}
-        onCancel={() => setEditModalVisible(false)}
-        footer={null}
-        width={700}
-      >
-        {selectedUser && (
-          <UserForm 
-            initialValues={selectedUser}
-            onSubmit={(values) => handleFormSubmit(values, true)}
-            onCancel={() => setEditModalVisible(false)}
-            loading={actionLoading}
-            isEdit={true}
+      {/* کارت‌های آمار */}
+      <Row gutter={[16, 16]} className="mb-6">
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="کل کاربران"
+            value={stats.total}
+            icon={<TeamOutlined />}
+            color="#1890ff"
+            loading={loading}
           />
-        )}
-      </Modal>
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="مدیران سیستم"
+            value={stats.admins}
+            icon={<UserSwitchOutlined />}
+            color="#722ed1"
+            loading={loading}
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="مشاوران"
+            value={stats.consultants}
+            icon={<UserOutlined />}
+            color="#13c2c2"
+            loading={loading}
+          />
+        </Col>
+        <Col xs={24} sm={12} lg={6}>
+          <StatCard
+            title="مراجعان"
+            value={stats.clients}
+            icon={<TeamOutlined />}
+            color="#52c41a"
+            loading={loading}
+          />
+        </Col>
+      </Row>
 
-      {/* Add User Modal */}
-      <Modal
-        title="افزودن کاربر جدید"
-        open={addModalVisible}
-        onCancel={() => setAddModalVisible(false)}
-        footer={null}
-        width={700}
-      >
-        <UserForm 
-          onSubmit={(values) => handleFormSubmit(values, false)}
-          onCancel={() => setAddModalVisible(false)}
-          loading={actionLoading}
-          isEdit={false}
+      {/* جدول کاربران */}
+      <Card>
+        <UsersTable
+          users={users}
+          loading={loading}
+          onView={handleViewUser}
+          onEdit={handleEditUser}
+          onDelete={handleDeleteUser}
         />
-      </Modal>
+      </Card>
 
-      {/* Delete Confirmation Modal */}
+      {/* دیالوگ تایید حذف کاربر */}
       <ConfirmDialog
-        visible={deleteModalVisible}
-        title="حذف کاربر"
-        content={
-          selectedUser 
-            ? `آیا از حذف کاربر "${selectedUser.fullName}" اطمینان دارید؟ این عملیات غیرقابل بازگشت است.`
-            : 'آیا از حذف این کاربر اطمینان دارید؟'
-        }
-        onCancel={() => setDeleteModalVisible(false)}
-        onConfirm={handleConfirmDelete}
-        confirmLoading={actionLoading}
+        visible={deleteConfirmVisible}
+        title="آیا از حذف این کاربر اطمینان دارید؟"
+        content="با حذف این کاربر، تمامی اطلاعات مرتبط با او نیز حذف خواهد شد. این عملیات غیرقابل بازگشت است."
+        onCancel={cancelDeleteUser}
+        onConfirm={confirmDeleteUser}
+        confirmLoading={deleteLoading}
         type="error"
       />
     </div>
