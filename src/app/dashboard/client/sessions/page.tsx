@@ -7,50 +7,32 @@ import SessionsList from '@/components/sessions/SessionsList';
 import { SessionStatus } from '@/components/sessions/session';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
 import PageHeader from '@/components/ui/PageHeader';
-import { authData } from '@/mocks/auth';
-import { consultants } from '@/mocks/consultants';
+import { authSamples } from '@/mocks/auth';
 import { sessions } from '@/mocks/sessions';
 
-export default function SessionsPage() {
+export default function ClientSessionsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userSessions, setUserSessions] = useState<any[]>([]);
 
   // Get current user
-  const currentUser = authData.currentUser;
-  const userRole = currentUser?.role || 'client';
+  const currentUser = authSamples.client;
 
   // Fetch sessions data
   useEffect(() => {
     // Simulate API call with a delay
     const timer = setTimeout(() => {
-      // Filter sessions based on user role
-      let filteredSessions = [];
-
-      if (userRole === 'admin') {
-        // Admin sees all sessions
-        filteredSessions = sessions;
-      } else if (userRole === 'consultant') {
-        // Consultant sees their sessions
-        const consultantId = consultants.find(
-          (c) => c.userId === currentUser?.id,
-        )?.id;
-        filteredSessions = sessions.filter(
-          (s) => s.consultantId === consultantId,
-        );
-      } else {
-        // Client sees their sessions
-        filteredSessions = sessions.filter(
-          (s) => s.client.user.id === currentUser?.id,
-        );
-      }
+      // Filter sessions for client
+      const filteredSessions = sessions.filter(
+        (s) => s.client.user.id === currentUser?.id,
+      );
 
       setUserSessions(filteredSessions);
       setLoading(false);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [currentUser?.id, userRole]);
+  }, [currentUser?.id]);
 
   // Handle view session details
   const handleViewSessionDetails = (sessionId: string) => {
@@ -97,14 +79,7 @@ export default function SessionsPage() {
 
   // Handle add new session
   const handleAddSession = () => {
-    if (userRole === 'client') {
-      router.push('/dashboard/client/consultants');
-    } else {
-      notification.info({
-        message: 'امکان پذیر نیست',
-        description: 'فقط مراجعان می‌توانند جلسه جدید رزرو کنند.',
-      });
-    }
+    router.push('/dashboard/client/consultants');
   };
 
   return (
@@ -119,12 +94,12 @@ export default function SessionsPage() {
       <SessionsList
         sessions={userSessions}
         loading={loading}
-        userRole={userRole as any}
+        userRole="client"
         onViewDetails={handleViewSessionDetails}
         onUpdateStatus={handleUpdateSessionStatus}
         onAddSession={handleAddSession}
         showFilters={true}
-        showAddButton={userRole === 'client'}
+        showAddButton={true}
       />
     </div>
   );

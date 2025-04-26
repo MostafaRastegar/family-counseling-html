@@ -2,32 +2,32 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Card, 
-  Row,
-  Col,
-  Tabs,
-  Typography,
-  notification,
-  DatePicker,
-  Badge,
-  Button,
-  Space
-} from 'antd';
-import { 
+import {
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
+  FileTextOutlined,
   FilterOutlined,
-  FileTextOutlined
 } from '@ant-design/icons';
-import { SessionStatus } from '@/components/sessions/session';
+import {
+  Badge,
+  Button,
+  Card,
+  Col,
+  DatePicker,
+  Row,
+  Space,
+  Tabs,
+  Typography,
+  notification,
+} from 'antd';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import SessionTable from '@/components/admin/SessionTable';
+import { SessionStatus } from '@/components/sessions/session';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
-import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import StatCard from '@/components/ui/card/StatCard';
+import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import { sessions as mockSessions } from '@/mocks/sessions';
 
 const { Text } = Typography;
@@ -38,15 +38,19 @@ export default function AdminSessionsPage() {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('all');
-  
+
   // حالت‌های دیالوگ
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmTitle, setConfirmTitle] = useState('');
   const [confirmContent, setConfirmContent] = useState('');
-  const [confirmType, setConfirmType] = useState<'confirm' | 'warning' | 'error'>('confirm');
+  const [confirmType, setConfirmType] = useState<
+    'confirm' | 'warning' | 'error'
+  >('confirm');
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [actionType, setActionType] = useState<'cancel' | null>(null);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null,
+  );
 
   // بارگذاری داده‌های جلسات
   useEffect(() => {
@@ -68,13 +72,13 @@ export default function AdminSessionsPage() {
   const getFilteredSessions = () => {
     switch (activeTab) {
       case 'pending':
-        return sessions.filter(s => s.status === 'pending');
+        return sessions.filter((s) => s.status === 'pending');
       case 'confirmed':
-        return sessions.filter(s => s.status === 'confirmed');
+        return sessions.filter((s) => s.status === 'confirmed');
       case 'completed':
-        return sessions.filter(s => s.status === 'completed');
+        return sessions.filter((s) => s.status === 'completed');
       case 'cancelled':
-        return sessions.filter(s => s.status === 'cancelled');
+        return sessions.filter((s) => s.status === 'cancelled');
       default:
         return sessions;
     }
@@ -95,7 +99,9 @@ export default function AdminSessionsPage() {
     setSelectedSessionId(sessionId);
     setActionType('cancel');
     setConfirmTitle('لغو جلسه مشاوره');
-    setConfirmContent('آیا از لغو این جلسه مشاوره اطمینان دارید؟ پس از لغو، این جلسه دیگر قابل بازگردانی نخواهد بود.');
+    setConfirmContent(
+      'آیا از لغو این جلسه مشاوره اطمینان دارید؟ پس از لغو، این جلسه دیگر قابل بازگردانی نخواهد بود.',
+    );
     setConfirmType('warning');
     setConfirmVisible(true);
   };
@@ -108,16 +114,20 @@ export default function AdminSessionsPage() {
 
     try {
       // شبیه‌سازی درخواست API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (actionType === 'cancel') {
         // به‌روزرسانی وضعیت جلسه به لغو شده
-        setSessions(prevSessions => 
-          prevSessions.map(s => 
-            s.id === selectedSessionId 
-              ? { ...s, status: 'cancelled', updatedAt: new Date().toISOString() } 
-              : s
-          )
+        setSessions((prevSessions) =>
+          prevSessions.map((s) =>
+            s.id === selectedSessionId
+              ? {
+                  ...s,
+                  status: 'cancelled',
+                  updatedAt: new Date().toISOString(),
+                }
+              : s,
+          ),
         );
         notification.success({
           message: 'جلسه لغو شد',
@@ -130,7 +140,8 @@ export default function AdminSessionsPage() {
     } catch (err) {
       notification.error({
         message: 'خطا در انجام عملیات',
-        description: 'متأسفانه خطایی در انجام عملیات رخ داده است. لطفا مجددا تلاش کنید.',
+        description:
+          'متأسفانه خطایی در انجام عملیات رخ داده است. لطفا مجددا تلاش کنید.',
       });
     } finally {
       setConfirmLoading(false);
@@ -150,9 +161,10 @@ export default function AdminSessionsPage() {
   const handleExportReport = () => {
     notification.info({
       message: 'در حال آماده‌سازی گزارش',
-      description: 'گزارش جلسات در حال آماده‌سازی است و به زودی دانلود خواهد شد.',
+      description:
+        'گزارش جلسات در حال آماده‌سازی است و به زودی دانلود خواهد شد.',
     });
-    
+
     // شبیه‌سازی دانلود گزارش
     setTimeout(() => {
       notification.success({
@@ -165,10 +177,10 @@ export default function AdminSessionsPage() {
   // محاسبه آمار جلسات
   const getSessionStats = () => {
     const total = sessions.length;
-    const pending = sessions.filter(s => s.status === 'pending').length;
-    const confirmed = sessions.filter(s => s.status === 'confirmed').length;
-    const completed = sessions.filter(s => s.status === 'completed').length;
-    const cancelled = sessions.filter(s => s.status === 'cancelled').length;
+    const pending = sessions.filter((s) => s.status === 'pending').length;
+    const confirmed = sessions.filter((s) => s.status === 'confirmed').length;
+    const completed = sessions.filter((s) => s.status === 'completed').length;
+    const cancelled = sessions.filter((s) => s.status === 'cancelled').length;
 
     // محاسبه جلسات امروز
     const today = new Date();
@@ -176,7 +188,7 @@ export default function AdminSessionsPage() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const todaySessions = sessions.filter(s => {
+    const todaySessions = sessions.filter((s) => {
       const sessionDate = new Date(s.date);
       return sessionDate >= today && sessionDate < tomorrow;
     }).length;
@@ -187,7 +199,7 @@ export default function AdminSessionsPage() {
       confirmed,
       completed,
       cancelled,
-      today: todaySessions
+      today: todaySessions,
     };
   };
 
@@ -278,7 +290,7 @@ export default function AdminSessionsPage() {
             <Button type="default">امروز</Button>
             <Button type="default">هفته جاری</Button>
             <Button type="default">ماه جاری</Button>
-            <RangePicker 
+            <RangePicker
               placeholder={['تاریخ شروع', 'تاریخ پایان']}
               allowClear
             />
@@ -289,37 +301,25 @@ export default function AdminSessionsPage() {
       {/* جدول جلسات */}
       <Card>
         <Tabs activeKey={activeTab} onChange={handleTabChange}>
-          <Tabs.TabPane 
-            tab={<span>همه جلسات</span>} 
-            key="all" 
-          />
-          <Tabs.TabPane 
+          <Tabs.TabPane tab={<span>همه جلسات</span>} key="all" />
+          <Tabs.TabPane
             tab={
               <span>
-                در انتظار تایید 
-                <Badge 
-                  count={stats.pending} 
-                  style={{ 
-                    marginRight: 6, 
-                    backgroundColor: stats.pending > 0 ? '#faad14' : '#d9d9d9' 
+                در انتظار تایید
+                <Badge
+                  count={stats.pending}
+                  style={{
+                    marginRight: 6,
+                    backgroundColor: stats.pending > 0 ? '#faad14' : '#d9d9d9',
                   }}
                 />
               </span>
-            } 
-            key="pending" 
+            }
+            key="pending"
           />
-          <Tabs.TabPane 
-            tab={<span>تایید شده</span>} 
-            key="confirmed" 
-          />
-          <Tabs.TabPane 
-            tab={<span>تکمیل شده</span>} 
-            key="completed" 
-          />
-          <Tabs.TabPane 
-            tab={<span>لغو شده</span>} 
-            key="cancelled" 
-          />
+          <Tabs.TabPane tab={<span>تایید شده</span>} key="confirmed" />
+          <Tabs.TabPane tab={<span>تکمیل شده</span>} key="completed" />
+          <Tabs.TabPane tab={<span>لغو شده</span>} key="cancelled" />
         </Tabs>
 
         <SessionTable

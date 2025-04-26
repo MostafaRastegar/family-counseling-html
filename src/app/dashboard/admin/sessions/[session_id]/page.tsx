@@ -2,25 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  Button, 
-  Card, 
-  Col, 
-  Descriptions, 
-  Divider, 
-  Modal, 
-  Row, 
-  Space, 
-  Steps, 
-  Tag, 
-  Typography, 
-  notification,
-  Tabs,
-  Timeline,
-  Input,
-  Form,
-  Avatar
-} from 'antd';
 import {
   CalendarOutlined,
   CheckCircleOutlined,
@@ -32,15 +13,34 @@ import {
   PhoneOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import {
+  Avatar,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Space,
+  Steps,
+  Tabs,
+  Tag,
+  Timeline,
+  Typography,
+  notification,
+} from 'antd';
 import dayjs from 'dayjs';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
 import StatusBadge from '@/components/ui/StatusBadge';
-import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import ReviewCard from '@/components/ui/card/ReviewCard';
-import { sessions as mockSessions } from '@/mocks/sessions';
-import { reviews as mockReviews } from '@/mocks/reviews';
+import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import { messages as mockMessages } from '@/mocks/messages';
+import { reviews as mockReviews } from '@/mocks/reviews';
+import { sessions as mockSessions } from '@/mocks/sessions';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -55,15 +55,19 @@ export default function AdminSessionDetailPage() {
   const [session, setSession] = useState<any>(null);
   const [sessionReview, setSessionReview] = useState<any>(null);
   const [sessionMessages, setSessionMessages] = useState<any[]>([]);
-  
+
   // حالت‌های دیالوگ
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmTitle, setConfirmTitle] = useState('');
   const [confirmContent, setConfirmContent] = useState('');
-  const [confirmType, setConfirmType] = useState<'confirm' | 'warning' | 'error'>('confirm');
+  const [confirmType, setConfirmType] = useState<
+    'confirm' | 'warning' | 'error'
+  >('confirm');
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [actionType, setActionType] = useState<'cancel' | 'confirm' | 'complete' | null>(null);
-  
+  const [actionType, setActionType] = useState<
+    'cancel' | 'confirm' | 'complete' | null
+  >(null);
+
   // برای ویرایش یادداشت‌ها
   const [notesModalVisible, setNotesModalVisible] = useState(false);
   const [sessionNotes, setSessionNotes] = useState('');
@@ -74,16 +78,18 @@ export default function AdminSessionDetailPage() {
     // شبیه‌سازی درخواست API
     const timer = setTimeout(() => {
       // یافتن اطلاعات جلسه
-      const foundSession = mockSessions.find(s => s.id === sessionId);
+      const foundSession = mockSessions.find((s) => s.id === sessionId);
       setSession(foundSession || null);
 
       if (foundSession) {
         // یافتن نظر مربوط به این جلسه (اگر وجود داشته باشد)
-        const foundReview = mockReviews.find(r => r.sessionId === sessionId);
+        const foundReview = mockReviews.find((r) => r.sessionId === sessionId);
         setSessionReview(foundReview || null);
 
         // یافتن پیام‌های مربوط به این جلسه
-        const foundMessages = mockMessages.filter(m => m.sessionId === sessionId);
+        const foundMessages = mockMessages.filter(
+          (m) => m.sessionId === sessionId,
+        );
         setSessionMessages(foundMessages || []);
 
         // تنظیم یادداشت‌های جلسه
@@ -122,7 +128,9 @@ export default function AdminSessionDetailPage() {
   const handleCancelSession = () => {
     setActionType('cancel');
     setConfirmTitle('لغو جلسه مشاوره');
-    setConfirmContent('آیا از لغو این جلسه مشاوره اطمینان دارید؟ این عملیات قابل بازگشت نیست.');
+    setConfirmContent(
+      'آیا از لغو این جلسه مشاوره اطمینان دارید؟ این عملیات قابل بازگشت نیست.',
+    );
     setConfirmType('warning');
     setConfirmVisible(true);
   };
@@ -140,7 +148,9 @@ export default function AdminSessionDetailPage() {
   const handleCompleteSession = () => {
     setActionType('complete');
     setConfirmTitle('تکمیل جلسه مشاوره');
-    setConfirmContent('آیا از تکمیل این جلسه مشاوره اطمینان دارید؟ پس از تکمیل، مراجع می‌تواند نظر خود را ثبت کند.');
+    setConfirmContent(
+      'آیا از تکمیل این جلسه مشاوره اطمینان دارید؟ پس از تکمیل، مراجع می‌تواند نظر خود را ثبت کند.',
+    );
     setConfirmType('confirm');
     setConfirmVisible(true);
   };
@@ -153,7 +163,7 @@ export default function AdminSessionDetailPage() {
 
     try {
       // شبیه‌سازی درخواست API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       let newStatus;
       let actionMessage;
@@ -174,11 +184,15 @@ export default function AdminSessionDetailPage() {
       }
 
       // به‌روزرسانی وضعیت جلسه
-      setSession(prev => prev ? { 
-        ...prev, 
-        status: newStatus,
-        updatedAt: new Date().toISOString()
-      } : null);
+      setSession((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: newStatus,
+              updatedAt: new Date().toISOString(),
+            }
+          : null,
+      );
 
       // نمایش پیام موفقیت
       notification.success({
@@ -191,7 +205,8 @@ export default function AdminSessionDetailPage() {
     } catch (err) {
       notification.error({
         message: 'خطا در انجام عملیات',
-        description: 'متأسفانه خطایی در انجام عملیات رخ داده است. لطفا مجددا تلاش کنید.',
+        description:
+          'متأسفانه خطایی در انجام عملیات رخ داده است. لطفا مجددا تلاش کنید.',
       });
     } finally {
       setConfirmLoading(false);
@@ -217,11 +232,15 @@ export default function AdminSessionDetailPage() {
     // شبیه‌سازی ذخیره یادداشت‌ها
     setTimeout(() => {
       // به‌روزرسانی یادداشت‌های جلسه
-      setSession(prev => prev ? { 
-        ...prev, 
-        notes: sessionNotes,
-        updatedAt: new Date().toISOString()
-      } : null);
+      setSession((prev) =>
+        prev
+          ? {
+              ...prev,
+              notes: sessionNotes,
+              updatedAt: new Date().toISOString(),
+            }
+          : null,
+      );
 
       setNotesLoading(false);
       setNotesModalVisible(false);
@@ -244,9 +263,9 @@ export default function AdminSessionDetailPage() {
       {
         title: 'تایید جلسه',
         description: 'تایید توسط مشاور',
-        status:
-          !session ? 'wait' as const :
-          session.status === 'pending'
+        status: !session
+          ? ('wait' as const)
+          : session.status === 'pending'
             ? ('process' as const)
             : session.status === 'cancelled' && session.status === 'pending'
               ? ('error' as const)
@@ -255,9 +274,9 @@ export default function AdminSessionDetailPage() {
       {
         title: 'برگزاری جلسه',
         description: 'انجام جلسه',
-        status:
-          !session ? 'wait' as const :
-          session.status === 'confirmed'
+        status: !session
+          ? ('wait' as const)
+          : session.status === 'confirmed'
             ? ('process' as const)
             : session.status === 'completed'
               ? ('finish' as const)
@@ -270,9 +289,9 @@ export default function AdminSessionDetailPage() {
       {
         title: 'اتمام جلسه',
         description: 'ثبت بازخورد',
-        status:
-          !session ? 'wait' as const :
-          session.status === 'completed'
+        status: !session
+          ? ('wait' as const)
+          : session.status === 'completed'
             ? ('finish' as const)
             : ('wait' as const),
       },
@@ -318,30 +337,32 @@ export default function AdminSessionDetailPage() {
           onClick: handleBack,
           text: 'بازگشت به لیست جلسات',
         }}
-        actions={[
-          session.status === 'pending' && {
-            key: 'confirm',
-            text: 'تایید جلسه',
-            icon: <CheckCircleOutlined />,
-            onClick: handleConfirmSession,
-            type: 'primary',
-          },
-          session.status === 'confirmed' && {
-            key: 'complete',
-            text: 'تکمیل جلسه',
-            icon: <CheckCircleOutlined />,
-            onClick: handleCompleteSession,
-            type: 'primary',
-          },
-          (session.status === 'pending' || session.status === 'confirmed') && {
-            key: 'cancel',
-            text: 'لغو جلسه',
-            icon: <ClockCircleOutlined />,
-            onClick: handleCancelSession,
-            type: 'default',
-          },
-        ].filter(Boolean) as any[]
-      }
+        actions={
+          [
+            session.status === 'pending' && {
+              key: 'confirm',
+              text: 'تایید جلسه',
+              icon: <CheckCircleOutlined />,
+              onClick: handleConfirmSession,
+              type: 'primary',
+            },
+            session.status === 'confirmed' && {
+              key: 'complete',
+              text: 'تکمیل جلسه',
+              icon: <CheckCircleOutlined />,
+              onClick: handleCompleteSession,
+              type: 'primary',
+            },
+            (session.status === 'pending' ||
+              session.status === 'confirmed') && {
+              key: 'cancel',
+              text: 'لغو جلسه',
+              icon: <ClockCircleOutlined />,
+              onClick: handleCancelSession,
+              type: 'default',
+            },
+          ].filter(Boolean) as any[]
+        }
       />
 
       <Row gutter={[16, 16]}>
@@ -350,9 +371,9 @@ export default function AdminSessionDetailPage() {
           <Card title="اطلاعات جلسه" className="mb-4">
             <Row gutter={[16, 16]}>
               <Col xs={24} md={12}>
-                <Card 
-                  type="inner" 
-                  title="مشاور" 
+                <Card
+                  type="inner"
+                  title="مشاور"
                   extra={
                     <Button type="link" onClick={handleViewConsultant}>
                       مشاهده پروفایل
@@ -361,22 +382,30 @@ export default function AdminSessionDetailPage() {
                 >
                   <div className="flex items-center">
                     <Avatar
-                      size={64} 
+                      size={64}
                       src={session.consultant.user.profileImage}
-                      icon={!session.consultant.user.profileImage && <UserOutlined />}
+                      icon={
+                        !session.consultant.user.profileImage && (
+                          <UserOutlined />
+                        )
+                      }
                       className="ml-4"
                     />
                     <div>
-                      <div className="text-lg font-medium">{session.consultant.user.fullName}</div>
-                      <div className="text-gray-500">{session.consultant.user.email}</div>
+                      <div className="text-lg font-medium">
+                        {session.consultant.user.fullName}
+                      </div>
+                      <div className="text-gray-500">
+                        {session.consultant.user.email}
+                      </div>
                     </div>
                   </div>
                 </Card>
               </Col>
               <Col xs={24} md={12}>
-                <Card 
-                  type="inner" 
-                  title="مراجع" 
+                <Card
+                  type="inner"
+                  title="مراجع"
                   extra={
                     <Button type="link" onClick={handleViewClient}>
                       مشاهده پروفایل
@@ -384,15 +413,21 @@ export default function AdminSessionDetailPage() {
                   }
                 >
                   <div className="flex items-center">
-                    <Avatar 
-                      size={64} 
+                    <Avatar
+                      size={64}
                       src={session.client.user.profileImage}
-                      icon={!session.client.user.profileImage && <UserOutlined />}
+                      icon={
+                        !session.client.user.profileImage && <UserOutlined />
+                      }
                       className="ml-4"
                     />
                     <div>
-                      <div className="text-lg font-medium">{session.client.user.fullName}</div>
-                      <div className="text-gray-500">{session.client.user.email}</div>
+                      <div className="text-lg font-medium">
+                        {session.client.user.fullName}
+                      </div>
+                      <div className="text-gray-500">
+                        {session.client.user.email}
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -401,8 +436,13 @@ export default function AdminSessionDetailPage() {
 
             <Divider />
 
-            <Descriptions bordered column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}>
-              <Descriptions.Item label="شناسه جلسه">{session.id}</Descriptions.Item>
+            <Descriptions
+              bordered
+              column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
+            >
+              <Descriptions.Item label="شناسه جلسه">
+                {session.id}
+              </Descriptions.Item>
               <Descriptions.Item label="تاریخ و زمان جلسه">
                 <div className="flex items-center">
                   <CalendarOutlined className="ml-1" />
@@ -413,12 +453,12 @@ export default function AdminSessionDetailPage() {
                 <StatusBadge status={session.status} />
               </Descriptions.Item>
               <Descriptions.Item label="روش ارتباطی">
-                {session.messengerType === 'telegram' 
-                  ? 'تلگرام' 
-                  : session.messengerType === 'whatsapp' 
-                    ? 'واتساپ' 
-                    : session.messengerType === 'phone' 
-                      ? 'تماس تلفنی' 
+                {session.messengerType === 'telegram'
+                  ? 'تلگرام'
+                  : session.messengerType === 'whatsapp'
+                    ? 'واتساپ'
+                    : session.messengerType === 'phone'
+                      ? 'تماس تلفنی'
                       : session.messengerType || 'تعیین نشده'}
               </Descriptions.Item>
               <Descriptions.Item label="شناسه ارتباط">
@@ -434,13 +474,13 @@ export default function AdminSessionDetailPage() {
           </Card>
 
           {/* یادداشت‌های جلسه */}
-          <Card 
-            title="یادداشت‌های جلسه" 
+          <Card
+            title="یادداشت‌های جلسه"
             className="mb-4"
             extra={
-              <Button 
-                type="link" 
-                icon={<EditOutlined />} 
+              <Button
+                type="link"
+                icon={<EditOutlined />}
                 onClick={handleEditNotes}
               >
                 ویرایش
@@ -450,7 +490,7 @@ export default function AdminSessionDetailPage() {
             {session.notes ? (
               <div className="whitespace-pre-line">{session.notes}</div>
             ) : (
-              <div className="text-center text-gray-500 py-4">
+              <div className="py-4 text-center text-gray-500">
                 یادداشتی برای این جلسه ثبت نشده است
               </div>
             )}
@@ -459,49 +499,62 @@ export default function AdminSessionDetailPage() {
           {/* بخش نظرات و پیام‌ها */}
           <Card title="نظر و پیام‌ها" className="mb-4">
             <Tabs defaultActiveKey="1">
-              <TabPane 
+              <TabPane
                 tab={
                   <span>
                     <CommentOutlined /> نظر مراجع
-                    {sessionReview && <Tag color="blue" className="mr-1">1</Tag>}
+                    {sessionReview && (
+                      <Tag color="blue" className="mr-1">
+                        1
+                      </Tag>
+                    )}
                   </span>
-                } 
+                }
                 key="1"
               >
                 {sessionReview ? (
                   <ReviewCard review={sessionReview} />
                 ) : (
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="py-4 text-center text-gray-500">
                     هیچ نظری برای این جلسه ثبت نشده است
                   </div>
                 )}
               </TabPane>
-              <TabPane 
+              <TabPane
                 tab={
                   <span>
                     <MessageOutlined /> پیام‌های ارسال شده
-                    {sessionMessages.length > 0 && <Tag color="blue" className="mr-1">{sessionMessages.length}</Tag>}
+                    {sessionMessages.length > 0 && (
+                      <Tag color="blue" className="mr-1">
+                        {sessionMessages.length}
+                      </Tag>
+                    )}
                   </span>
-                } 
+                }
                 key="2"
               >
                 {sessionMessages.length > 0 ? (
                   <Timeline>
-                    {sessionMessages.map(message => (
+                    {sessionMessages.map((message) => (
                       <Timeline.Item key={message.id}>
                         <div className="mb-1">{message.text}</div>
                         <div className="text-xs text-gray-500">
-                          {formatDateTime(message.createdAt)} - 
-                          {message.success ? 
-                            <Tag color="success" className="mr-1">ارسال موفق</Tag> : 
-                            <Tag color="error" className="mr-1">خطا در ارسال</Tag>
-                          }
+                          {formatDateTime(message.createdAt)} -
+                          {message.success ? (
+                            <Tag color="success" className="mr-1">
+                              ارسال موفق
+                            </Tag>
+                          ) : (
+                            <Tag color="error" className="mr-1">
+                              خطا در ارسال
+                            </Tag>
+                          )}
                         </div>
                       </Timeline.Item>
                     ))}
                   </Timeline>
                 ) : (
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="py-4 text-center text-gray-500">
                     هیچ پیامی برای این جلسه ارسال نشده است
                   </div>
                 )}
@@ -513,7 +566,7 @@ export default function AdminSessionDetailPage() {
         <Col xs={24} lg={8}>
           {/* کارت وضعیت */}
           <Card title="وضعیت جلسه" className="mb-4">
-            <Steps 
+            <Steps
               direction="vertical"
               current={
                 session.status === 'pending'
@@ -572,25 +625,32 @@ export default function AdminSessionDetailPage() {
             <Timeline>
               <Timeline.Item>
                 <p>ایجاد جلسه</p>
-                <p className="text-xs text-gray-500">{formatDateTime(session.createdAt)}</p>
+                <p className="text-xs text-gray-500">
+                  {formatDateTime(session.createdAt)}
+                </p>
               </Timeline.Item>
               {session.status !== 'pending' && (
-                <Timeline.Item color={session.status === 'cancelled' ? 'red' : 'green'}>
+                <Timeline.Item
+                  color={session.status === 'cancelled' ? 'red' : 'green'}
+                >
                   <p>
-                    {session.status === 'confirmed' 
+                    {session.status === 'confirmed'
                       ? 'تایید جلسه'
                       : session.status === 'completed'
                         ? 'تکمیل جلسه'
-                        : 'لغو جلسه'
-                    }
+                        : 'لغو جلسه'}
                   </p>
-                  <p className="text-xs text-gray-500">{formatDateTime(session.updatedAt)}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatDateTime(session.updatedAt)}
+                  </p>
                 </Timeline.Item>
               )}
               {session.status === 'completed' && sessionReview && (
                 <Timeline.Item>
                   <p>ثبت نظر توسط مراجع</p>
-                  <p className="text-xs text-gray-500">{formatDateTime(sessionReview.createdAt)}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatDateTime(sessionReview.createdAt)}
+                  </p>
                 </Timeline.Item>
               )}
             </Timeline>

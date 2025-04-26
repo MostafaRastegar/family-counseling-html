@@ -8,23 +8,20 @@ import SessionDetail from '@/components/sessions/SessionDetail';
 import { SessionStatus } from '@/components/sessions/session';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
 import PageHeader from '@/components/ui/PageHeader';
-import { authData } from '@/mocks/auth';
+import { authSamples } from '@/mocks/auth';
 import { sessions } from '@/mocks/sessions';
 
-export default function SessionDetailPage() {
+export default function ClientSessionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  console.log('params :>> ', params);
   const sessionId = params.session_id as string;
-  console.log('sessionId :>> ', sessionId);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
 
   // Get current user
-  const currentUser = authData.currentUser;
-  const userRole = currentUser?.role || 'client';
+  const currentUser = authSamples.client;
 
   // Fetch session data
   useEffect(() => {
@@ -32,15 +29,30 @@ export default function SessionDetailPage() {
     const timer = setTimeout(() => {
       // Find session in mock data
       const foundSession = sessions.find((s) => s.id === sessionId);
-      setSession(foundSession || null);
+
+      // Verify this session belongs to the current client
+      if (foundSession && foundSession.client.user.id === currentUser?.id) {
+        setSession(foundSession);
+      } else {
+        setSession(null);
+      }
       setLoading(false);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [sessionId]);
+  }, [sessionId, currentUser?.id]);
 
-  // Handle session status update
+  // Handle session status update - mainly for cancellation
   const handleUpdateStatus = (sessionId: string, status: SessionStatus) => {
+    // Clients can only cancel sessions
+    if (status !== 'cancelled') {
+      notification.error({
+        message: 'عملیات غیرمجاز',
+        description: 'شما فقط امکان لغو جلسه را دارید.',
+      });
+      return;
+    }
+
     setActionLoading(true);
 
     // Simulate API call with a delay
@@ -57,20 +69,9 @@ export default function SessionDetailPage() {
 
       // Show success notification
       notification.success({
-        message: 'وضعیت جلسه به‌روزرسانی شد',
-        description: `وضعیت جلسه با موفقیت به "${
-          status === 'cancelled'
-            ? 'لغو شده'
-            : status === 'confirmed'
-              ? 'تایید شده'
-              : 'انجام شده'
-        }" تغییر یافت.`,
+        message: 'جلسه لغو شد',
+        description: 'جلسه مشاوره با موفقیت لغو شد.',
       });
-
-      // If session was completed, show review modal for clients
-      if (status === 'completed' && userRole === 'client') {
-        setReviewModalVisible(true);
-      }
     }, 1500);
   };
 
@@ -100,6 +101,15 @@ export default function SessionDetailPage() {
 
   // Handle add review
   const handleAddReview = (sessionId: string) => {
+    // Only allow reviews for completed sessions
+    if (session.status !== 'completed') {
+      notification.info({
+        message: 'امکان ثبت نظر وجود ندارد',
+        description: 'برای ثبت نظر، جلسه باید تکمیل شده باشد.',
+      });
+      return;
+    }
+
     setReviewModalVisible(true);
   };
 
@@ -153,11 +163,7 @@ export default function SessionDetailPage() {
         title="جزئیات جلسه مشاوره"
         subtitle={
           session
-            ? `جلسه با ${
-                userRole === 'consultant'
-                  ? session.client.user.fullName
-                  : session.consultant.user.fullName
-              } در تاریخ ${formatSessionDate(session.date)}`
+            ? `جلسه با ${session.consultant.user.fullName} در تاریخ ${formatSessionDate(session.date)}`
             : ''
         }
         backButton={{
@@ -168,8 +174,12 @@ export default function SessionDetailPage() {
       <SessionDetail
         session={session}
         loading={loading}
-        error={!session && !loading ? 'جلسه مورد نظر یافت نشد' : undefined}
-        userRole={userRole as any}
+        error={
+          !session && !loading
+            ? 'جلسه مورد نظر یافت نشد یا به این جلسه دسترسی ندارید'
+            : undefined
+        }
+        userRole="client"
         onUpdateStatus={handleUpdateStatus}
         onEditNotes={handleEditNotes}
         onAddReview={handleAddReview}
