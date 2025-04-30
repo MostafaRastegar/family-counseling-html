@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layout } from 'antd';
+import { authData } from '@/mocks/auth';
 import AppFooter from '../ui/Footer';
 import AppHeader from '../ui/Header';
 
@@ -12,7 +13,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <Layout className="bg-gray-50 rtl min-h-screen" dir="rtl">
-      <AppHeader />
+      <AppHeader showSidebarToggle currentUser={authData.currentUser} />
       <Content className="mx-auto w-full max-w-7xl p-4 sm:p-6">
         {children}
       </Content>

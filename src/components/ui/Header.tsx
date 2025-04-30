@@ -59,7 +59,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   onLogout,
 }) => {
   const router = useRouter();
-  const [logoutLoading, setLogoutLoading] = useState(false);
 
   // Sample notifications for demonstration
   const [notifications] = useState<Notification[]>([
@@ -90,19 +89,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   ]);
 
   // Handle logout
-  const handleLogout = () => {
-    setLogoutLoading(true);
-
-    if (onLogout) {
-      onLogout();
-      return;
-    }
-
-    // Use the blacklist token function for logout
-    blackListToken(setLogoutLoading).then(() => {
-      router.push('/auth/login');
-    });
-  };
+  const handleLogout = () => {};
 
   // User dropdown menu
   const userMenuItems: MenuProps['items'] = [
@@ -229,7 +216,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
   // Notification popover content
   const notificationContent = (
-    <div className="max-h-96 w-80">
+    <div className="w-80 p-4">
       <Tabs defaultActiveKey="all" items={notificationTabs} />
     </div>
   );
@@ -252,23 +239,23 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         </Link>
 
         {/* Global search - only show on large screens */}
-        <div className="hidden md:ml-4 md:block">
+        {/* <div className="hidden md:ml-4 md:block">
           <Search
             placeholder="جستجو..."
             allowClear
             onSearch={(value) => console.log(value)}
             style={{ width: 200 }}
           />
-        </div>
+        </div> */}
       </div>
 
-      <div className="flex items-center">
+      <div className="flex items-center gap-4">
         {/* Navigation links for larger screens */}
         <div className="hidden md:mr-4 md:flex">
           <Button
-            type="text"
+            type="default"
             icon={<TeamOutlined />}
-            onClick={() => router.push('/dashboard/client/consultants')}
+            onClick={() => router.push('/consultants')}
           >
             یافتن مشاور
           </Button>
@@ -290,9 +277,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             }
           >
             <Badge
-              count={notifications.filter((n) => !n.read).length}
               size="small"
               className="mr-2 cursor-pointer"
+              dot={!!notifications.filter((n) => !n.read).length}
             >
               <Button type="text" icon={<BellOutlined />} />
             </Badge>

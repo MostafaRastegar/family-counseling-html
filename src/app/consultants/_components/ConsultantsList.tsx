@@ -1,8 +1,8 @@
 import React from 'react';
 import { Empty, Pagination, Spin, Typography } from 'antd';
-import ConsultantCard from '../ui/card/ConsultantCard';
-import EmptyState from '../ui/states/EmptyState';
-import ErrorState from '../ui/states/ErrorState';
+import ConsultantCard from '../../../components/ui/card/ConsultantCard';
+import EmptyState from '../../../components/ui/states/EmptyState';
+import ErrorState from '../../../components/ui/states/ErrorState';
 import { ConsultantFilterValues } from './ConsultantSearchFilter';
 
 const { Title } = Typography;

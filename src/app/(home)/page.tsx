@@ -81,7 +81,7 @@ export default function Home() {
             مشاوره آنلاین با بهترین متخصصان حوزه خانواده، ازدواج و فرزندپروری در
             هر زمان و هر مکان که هستید
           </Paragraph>
-          <Link href="/dashboard/client/consultants">
+          <Link href="/consultants">
             <Button type="primary" size="large" icon={<ArrowRightOutlined />}>
               شروع مشاوره
             </Button>
@@ -170,9 +170,7 @@ export default function Home() {
                     <Paragraph className="mb-4">{consultant.bio}</Paragraph>
                     <Rate disabled defaultValue={consultant.rating} />
                     <div className="mt-4">
-                      <Link
-                        href={`/dashboard/client/consultants/${consultant.id}`}
-                      >
+                      <Link href={`/consultants/${consultant.id}`}>
                         <Button type="primary">مشاهده پروفایل</Button>
                       </Link>
                     </div>
@@ -183,7 +181,7 @@ export default function Home() {
           </Row>
 
           <div className="mt-10 text-center">
-            <Link href="/dashboard/client/consultants">
+            <Link href="/consultants">
               <Button type="default" size="large">
                 مشاهده همه مشاوران <ArrowRightOutlined />
               </Button>
@@ -232,7 +230,7 @@ export default function Home() {
               ثبت نام کنید
             </Button>
           </Link>
-          <Link href="/dashboard/client/consultants">
+          <Link href="/consultants">
             <Button
               type="primary"
               size="large"

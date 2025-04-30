@@ -6,8 +6,8 @@ import { Col, Input, Row } from 'antd';
 import ConsultantSearchFilter, {
   ConsultantFilterValues,
   defaultFilterValues,
-} from '@/components/clients/ConsultantSearchFilter';
-import ConsultantsList from '@/components/clients/ConsultantsList';
+} from '@/app/consultants/_components/ConsultantSearchFilter';
+import ConsultantsList from '@/app/consultants/_components/ConsultantsList';
 import PageHeader from '@/components/ui/PageHeader';
 import { consultants } from '@/mocks/consultants';
 
@@ -63,61 +63,15 @@ export default function ConsultantsPage() {
   };
 
   // Filter consultants based on search query and filters
-  const filteredConsultants = consultants
-    .filter((consultant) => {
-      // Search by name
-      if (searchQuery && !consultant.user.fullName.includes(searchQuery)) {
-        return false;
-      }
-
-      // Filter by specialties
-      if (
-        filters.specialties.length > 0 &&
-        !filters.specialties.some((specialty) =>
-          consultant.specialties.includes(specialty),
-        )
-      ) {
-        return false;
-      }
-
-      // Filter by minimum rating
-      if (filters.minRating > 0 && consultant.rating < filters.minRating) {
-        return false;
-      }
-
-      // Filter by verified status
-      if (filters.isVerified && !consultant.isVerified) {
-        return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      // Sort based on selected sort option
-      switch (filters.sortBy) {
-        case 'rating':
-          return b.rating - a.rating;
-        case 'reviews':
-          return b.reviewCount - a.reviewCount;
-        default:
-          return b.rating - a.rating;
-      }
-    });
-
-  // Calculate pagination
-  const paginatedConsultants = filteredConsultants.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize,
-  );
 
   // Handle navigation to consultant profile
   const handleViewProfile = (consultantId: string) => {
-    router.push(`/dashboard/client/consultants/${consultantId}`);
+    router.push(`/consultants/${consultantId}`);
   };
 
   // Handle booking appointment
   const handleBookAppointment = (consultantId: string) => {
-    router.push(`/dashboard/client/consultants/${consultantId}/book`);
+    router.push(`/consultants/${consultantId}/book`);
   };
 
   // Handle pagination change
@@ -170,7 +124,7 @@ export default function ConsultantsPage() {
         {/* Consultants list */}
         <Col xs={24} md={16} lg={18}>
           <ConsultantsList
-            consultants={paginatedConsultants}
+            consultants={consultants}
             loading={loading}
             onViewProfile={handleViewProfile}
             onBookAppointment={handleBookAppointment}
@@ -178,7 +132,7 @@ export default function ConsultantsPage() {
             pagination={{
               current: currentPage,
               pageSize: pageSize,
-              total: filteredConsultants.length,
+              total: consultants.length,
               onChange: handlePageChange,
             }}
           />

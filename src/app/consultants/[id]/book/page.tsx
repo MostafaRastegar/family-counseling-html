@@ -129,7 +129,7 @@ export default function BookConsultantPage() {
 
   // Handle cancel
   const handleCancel = () => {
-    router.push(`/dashboard/client/consultants/${consultantId}`);
+    router.push(`/consultants/${consultantId}`);
   };
 
   // If still loading
@@ -147,7 +147,7 @@ export default function BookConsultantPage() {
         </p>
         <Button
           type="primary"
-          onClick={() => router.push('/dashboard/client/consultants')}
+          onClick={() => router.push('/consultants')}
           className="mt-4"
         >
           بازگشت به لیست مشاوران
@@ -201,10 +201,7 @@ export default function BookConsultantPage() {
                 <Button type="primary" key="console" onClick={handleFinish}>
                   مشاهده جلسات من
                 </Button>,
-                <Button
-                  key="buy"
-                  onClick={() => router.push('/dashboard/client/consultants')}
-                >
+                <Button key="buy" onClick={() => router.push('/consultants')}>
                   رزرو جلسه دیگر
                 </Button>,
               ]}

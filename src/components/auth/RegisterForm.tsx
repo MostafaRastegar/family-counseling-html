@@ -10,7 +10,7 @@ import {
 import { Alert, Button, Checkbox, Form, Input, Select, Typography } from 'antd';
 import { UsersPresentation } from '@/modules/users/Users.presentation';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 interface RegisterFormProps {
@@ -65,10 +65,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
   return (
     <div className="register-form-container">
-      <Title level={3} className="mb-6 text-center">
-        ثبت‌نام در سامانه
-      </Title>
-
       {isError && (
         <Alert
           message="خطا در ثبت‌نام"

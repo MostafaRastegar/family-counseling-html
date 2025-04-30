@@ -14,7 +14,7 @@ import {
   Typography,
 } from 'antd';
 import type { RadioChangeEvent } from 'antd';
-import SpecialtiesSelect from '../consultants/SpecialtiesSelect';
+import SpecialtiesSelect from '../../../components/consultants/SpecialtiesSelect';
 
 const { Panel } = Collapse;
 const { Text, Title } = Typography;

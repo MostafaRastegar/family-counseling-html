@@ -8,7 +8,7 @@ const AppFooter: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <Footer className="bg-gray-100 p-6 text-center">
+    <Footer className="border-t bg-gray-100 p-6 text-center">
       <div className="mx-auto max-w-7xl">
         <div className="mb-6 grid grid-cols-1 gap-6 text-right md:grid-cols-3">
           <div>

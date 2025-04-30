@@ -96,7 +96,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({
           key: 'find-consultant',
           title: 'یافتن مشاور',
           icon: <TeamOutlined />,
-          link: '/dashboard/client/consultants',
+          link: '/consultants',
           color: 'bg-indigo-100 text-indigo-500',
           tooltip: 'جستجو و انتخاب مشاور',
         },

@@ -67,7 +67,7 @@ export default function ConsultantDetailPage() {
 
   // Handle booking appointment
   const handleBookAppointment = () => {
-    router.push(`/dashboard/client/consultants/${consultantId}/book`);
+    router.push(`/consultants/${consultantId}/book`);
   };
 
   // Handle back button

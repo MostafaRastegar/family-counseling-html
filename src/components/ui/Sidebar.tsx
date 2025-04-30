@@ -164,9 +164,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       ],
       client: [
         {
-          key: '/dashboard/client/consultants',
+          key: '/consultants',
           icon: <TeamOutlined />,
-          label: <Link href="/dashboard/client/consultants">یافتن مشاور</Link>,
+          label: <Link href="/consultants">یافتن مشاور</Link>,
         },
         {
           key: '/dashboard/client/reviews',

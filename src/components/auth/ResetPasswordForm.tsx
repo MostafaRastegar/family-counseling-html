@@ -3,16 +3,9 @@ import { useRouter } from 'next/navigation';
 import { CheckCircleOutlined, LockOutlined } from '@ant-design/icons';
 import { Alert, Button, Form, Input, Result, Typography } from 'antd';
 
-const { Title, Text, Paragraph } = Typography;
-
 interface ResetPasswordFormProps {
   token?: string;
   onSuccess?: () => void;
-}
-
-interface ResetPasswordFormValues {
-  password: string;
-  confirmPassword: string;
 }
 
 const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
@@ -21,45 +14,35 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const router = useRouter();
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (values: ResetPasswordFormValues) => {
-    const { password } = values;
-    
-    // بررسی وجود توکن
+  const handleSubmit = () => {
     if (!token) {
-      setError('توکن بازیابی نامعتبر است. لطفاً مجدداً درخواست بازیابی رمز عبور دهید.');
+      setError(
+        'توکن بازیابی نامعتبر است. لطفاً مجدداً درخواست بازیابی رمز عبور دهید.',
+      );
       return;
     }
-    
-    // شبیه‌سازی ارسال درخواست
+
     setIsSubmitting(true);
     setError(null);
-    
-    // در حالت واقعی باید درخواست به سرور ارسال شود
-    // اما فعلاً شبیه‌سازی می‌کنیم
+
     setTimeout(() => {
       setIsSubmitting(false);
-      
-      // شبیه‌سازی موفقیت
       setIsSubmitted(true);
-      
       if (onSuccess) {
         onSuccess();
       }
     }, 1500);
   };
 
-  // اگر فرم با موفقیت ارسال شده باشد، نتیجه را نشان می‌دهیم
   if (isSubmitted) {
     return (
       <Result
         icon={<CheckCircleOutlined className="text-green-500" />}
-        title="رمز عبور با موفقیت تغییر کرد"
-        subTitle="می‌توانید با استفاده از رمز عبور جدید وارد حساب کاربری خود شوید."
         extra={[
           <Button
             type="primary"
@@ -75,14 +58,6 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
 
   return (
     <div className="reset-password-form-container">
-      <Title level={3} className="mb-4 text-center">
-        تنظیم رمز عبور جدید
-      </Title>
-      
-      <Paragraph className="mb-6 text-center text-gray-500">
-        لطفاً رمز عبور جدید خود را وارد کنید.
-      </Paragraph>
-
       {error && (
         <Alert
           message="خطا"

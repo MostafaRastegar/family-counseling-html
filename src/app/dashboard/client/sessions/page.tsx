@@ -79,7 +79,7 @@ export default function ClientSessionsPage() {
 
   // Handle add new session
   const handleAddSession = () => {
-    router.push('/dashboard/client/consultants');
+    router.push('/consultants');
   };
 
   return (

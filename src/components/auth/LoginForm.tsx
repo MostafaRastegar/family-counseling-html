@@ -1,90 +1,19 @@
-import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import {
-  LockOutlined,
-  MailOutlined,
-  UserOutlined,
-  WechatOutlined,
-} from '@ant-design/icons';
-import {
-  Alert,
-  Button,
-  Checkbox,
-  Divider,
-  Form,
-  Input,
-  Typography,
-} from 'antd';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { Alert, Button, Checkbox, Form, Input, Typography } from 'antd';
 import { UsersPresentation } from '@/modules/users/Users.presentation';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-interface LoginFormProps {
-  onSuccess?: () => void;
-  redirectUrl?: string;
-}
-
-interface LoginFormValues {
-  email: string;
-  password: string;
-  remember: boolean;
-}
-
-const LoginForm: React.FC<LoginFormProps> = ({
-  onSuccess,
-  redirectUrl = '/dashboard',
-}) => {
+const LoginForm = () => {
   const [form] = Form.useForm();
-  const router = useRouter();
   const { useUserLogin } = UsersPresentation();
-  const { mutate: login, isPending, error, isError } = useUserLogin();
+  const { isPending, error, isError } = useUserLogin();
 
-  const [useMock, setUseMock] = useState<boolean>(false);
-
-  const handleSubmit = (values: LoginFormValues) => {
-    const { email, password, remember } = values;
-
-    // اگر محیط تست/مک باشد، از لاگین شبیه‌سازی شده استفاده می‌کنیم
-    if (useMock) {
-      // @ts-ignore - اینجا از متد لاگین مک استفاده می‌کنیم که در سرویس تعریف شده
-      login({
-        user: {
-          email,
-          password,
-        },
-      });
-    } else {
-      // استفاده از لاگین اصلی
-      login({
-        user: {
-          email,
-          password,
-        },
-      });
-    }
-  };
-
-  // برای حالت نمایشی، می‌توانید از این متد استفاده کنید
-  const handleMockLogin = () => {
-    setUseMock(true);
-    form.setFieldsValue({
-      email: 'consultant1@example.com',
-      password: 'password123',
-      remember: true,
-    });
-
-    setTimeout(() => {
-      form.submit();
-    }, 100);
-  };
+  const handleSubmit = () => {};
 
   return (
     <div className="login-form-container">
-      <Title level={3} className="mb-6 text-center">
-        ورود به حساب کاربری
-      </Title>
-
       {isError && (
         <Alert
           message="خطا در ورود"
@@ -165,22 +94,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
             </Link>
           </Text>
         </div>
-
-        {process.env.NODE_ENV === 'development' && (
-          <>
-            <Divider>
-              <Text type="secondary">حالت نمایشی</Text>
-            </Divider>
-            <Button
-              icon={<UserOutlined />}
-              onClick={handleMockLogin}
-              block
-              className="mb-2"
-            >
-              ورود نمایشی
-            </Button>
-          </>
-        )}
       </Form>
     </div>
   );
