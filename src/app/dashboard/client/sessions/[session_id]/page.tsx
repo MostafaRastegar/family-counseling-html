@@ -8,7 +8,7 @@ import SessionDetail from '@/components/sessions/SessionDetail';
 import { SessionStatus } from '@/components/sessions/session';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
 import PageHeader from '@/components/ui/PageHeader';
-import { authSamples } from '@/mocks/auth';
+import { authData } from '@/mocks/auth';
 import { sessions } from '@/mocks/sessions';
 
 export default function ClientSessionDetailPage() {
@@ -21,7 +21,7 @@ export default function ClientSessionDetailPage() {
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
 
   // Get current user
-  const currentUser = authSamples.client;
+  const currentUser = authData.currentUser;
 
   // Fetch session data
   useEffect(() => {

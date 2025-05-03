@@ -2,32 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Button, 
-  Card, 
-  Modal, 
-  Typography, 
-  notification,
-  Row,
-  Col
-} from 'antd';
-import { 
+import {
   PlusOutlined,
-  UserAddOutlined,
-  ExclamationCircleOutlined,
   TeamOutlined,
   UserOutlined,
-  UserSwitchOutlined
+  UserSwitchOutlined,
 } from '@ant-design/icons';
+import { Card, Col, Row, notification } from 'antd';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import UsersTable from '@/components/admin/UsersTable';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
-import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import StatCard from '@/components/ui/card/StatCard';
+import ConfirmDialog from '@/components/ui/modals/ConfirmDialog';
 import { users as mockUsers } from '@/mocks/users';
-
-const { Text } = Typography;
-const { confirm } = Modal;
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -72,10 +59,12 @@ export default function AdminUsersPage() {
 
     try {
       // شبیه‌سازی درخواست API برای حذف کاربر
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // حذف کاربر از لیست (در حالت واقعی از طریق API انجام می‌شود)
-      setUsers(prevUsers => prevUsers.filter(user => user.id !== userToDelete));
+      setUsers((prevUsers) =>
+        prevUsers.filter((user) => user.id !== userToDelete),
+      );
 
       // نمایش پیام موفقیت
       notification.success({
@@ -88,7 +77,8 @@ export default function AdminUsersPage() {
     } catch (err) {
       notification.error({
         message: 'خطا در حذف کاربر',
-        description: 'متأسفانه خطایی در حذف کاربر رخ داده است. لطفا مجددا تلاش کنید.',
+        description:
+          'متأسفانه خطایی در حذف کاربر رخ داده است. لطفا مجددا تلاش کنید.',
       });
     } finally {
       setDeleteLoading(false);
@@ -110,15 +100,17 @@ export default function AdminUsersPage() {
   // محاسبه آمار کاربران
   const getUserStats = () => {
     const total = users.length;
-    const admins = users.filter(user => user.role === 'admin').length;
-    const consultants = users.filter(user => user.role === 'consultant').length;
-    const clients = users.filter(user => user.role === 'client').length;
+    const admins = users.filter((user) => user.role === 'admin').length;
+    const consultants = users.filter(
+      (user) => user.role === 'consultant',
+    ).length;
+    const clients = users.filter((user) => user.role === 'client').length;
 
     return {
       total,
       admins,
       consultants,
-      clients
+      clients,
     };
   };
 

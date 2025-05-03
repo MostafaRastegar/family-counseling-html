@@ -7,7 +7,7 @@ import SessionDetail from '@/components/sessions/SessionDetail';
 import { SessionStatus } from '@/components/sessions/session';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
 import PageHeader from '@/components/ui/PageHeader';
-import { authSamples } from '@/mocks/auth';
+import { authData } from '@/mocks/auth';
 import { consultants } from '@/mocks/consultants';
 import { sessions } from '@/mocks/sessions';
 
@@ -20,7 +20,7 @@ export default function ConsultantSessionDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Get current user
-  const currentUser = authSamples.consultant;
+  const currentUser = authData.currentUser;
 
   // Fetch session data
   useEffect(() => {

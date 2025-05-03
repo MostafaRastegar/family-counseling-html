@@ -35,12 +35,12 @@ type MenuItem = Required<MenuProps>['items'][number];
 
 const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
-  userRole = 'client',
+  userRole,
   activePath,
   onLogout,
 }) => {
   const pathname = usePathname();
-  const [openKeys, setOpenKeys] = useState<string[]>(['/dashboard']);
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
 
   // Use provided activePath or current pathname for highlighting
   const currentPath = activePath || pathname;
@@ -50,38 +50,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   // Handle submenu open/close
   const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
-    const latestOpenKey = keys.find((key) => openKeys.indexOf(key) === -1);
-    setOpenKeys(latestOpenKey ? [latestOpenKey] : []);
+    setOpenKeys(keys);
   };
 
   // Define menu items based on user role
   const getMenuItems = (): MenuItem[] => {
+    // Common items for all users
     const commonItems: MenuItem[] = [
-      {
-        key: '/dashboard',
-        icon: <DashboardOutlined />,
-        label: <Link href="/dashboard">داشبورد</Link>,
-      },
-      {
-        key: 'profile',
-        icon: <UserOutlined />,
-        label: 'پروفایل',
-        children: [
-          {
-            key: '/dashboard/profile',
-            label: <Link href="/dashboard/profile">مشاهده پروفایل</Link>,
-          },
-          {
-            key: '/dashboard/settings',
-            label: <Link href="/dashboard/settings">تنظیمات حساب</Link>,
-          },
-        ],
-      },
-      {
-        key: '/dashboard/sessions',
-        icon: <CalendarOutlined />,
-        label: <Link href="/dashboard/sessions">جلسات من</Link>,
-      },
       {
         key: '/dashboard/wallet',
         icon: <WalletOutlined />,
@@ -92,115 +67,135 @@ const Sidebar: React.FC<SidebarProps> = ({
         icon: <BellOutlined />,
         label: <Link href="/dashboard/notifications">اعلان‌ها</Link>,
       },
+      {
+        key: '/dashboard/messaging',
+        icon: <MessageOutlined />,
+        label: <Link href="/dashboard/messaging">پیام‌ها</Link>,
+      },
     ];
 
-    const roleBasedItems: Record<string, MenuItem[]> = {
-      admin: [
-        {
-          key: 'management',
-          icon: <AppstoreOutlined />,
-          label: 'مدیریت سیستم',
-          children: [
-            {
-              key: '/dashboard/admin/stats',
-              label: <Link href="/dashboard/admin/stats">آمار کلی</Link>,
-            },
-            {
-              key: '/dashboard/admin/users',
-              label: <Link href="/dashboard/admin/users">مدیریت کاربران</Link>,
-            },
-            {
-              key: '/dashboard/admin/consultants',
-              label: (
-                <Link href="/dashboard/admin/consultants">مدیریت مشاوران</Link>
-              ),
-            },
-            {
-              key: '/dashboard/admin/sessions',
-              label: <Link href="/dashboard/admin/sessions">مدیریت جلسات</Link>,
-            },
-            {
-              key: '/dashboard/admin/reviews',
-              label: <Link href="/dashboard/admin/reviews">مدیریت نظرات</Link>,
-            },
-          ],
-        },
-        {
-          key: '/dashboard/admin/reports',
-          icon: <FileTextOutlined />,
-          label: <Link href="/dashboard/admin/reports">گزارش‌ها</Link>,
-        },
-        {
-          key: '/dashboard/admin/settings',
-          icon: <SettingOutlined />,
-          label: <Link href="/dashboard/admin/settings">تنظیمات سیستم</Link>,
-        },
-      ],
-      consultant: [
-        {
-          key: '/dashboard/consultant/profile',
-          icon: <UserOutlined />,
-          label: (
-            <Link href="/dashboard/consultant/profile">پروفایل حرفه‌ای</Link>
-          ),
-        },
-        {
-          key: '/dashboard/consultant/availability',
-          icon: <ClockCircleOutlined />,
-          label: (
-            <Link href="/dashboard/consultant/availability">زمان‌های من</Link>
-          ),
-        },
-        {
-          key: '/dashboard/consultant/reviews',
-          icon: <StarOutlined />,
-          label: <Link href="/dashboard/consultant/reviews">نظرات من</Link>,
-        },
-        {
-          key: '/dashboard/messaging',
-          icon: <MessageOutlined />,
-          label: <Link href="/dashboard/messaging">پیام‌رسانی</Link>,
-        },
-      ],
-      client: [
-        {
-          key: '/consultants',
-          icon: <TeamOutlined />,
-          label: <Link href="/consultants">یافتن مشاور</Link>,
-        },
-        {
-          key: '/dashboard/client/reviews',
-          icon: <StarOutlined />,
-          label: <Link href="/dashboard/client/reviews">نظرات من</Link>,
-        },
-        {
-          key: '/dashboard/messaging',
-          icon: <MessageOutlined />,
-          label: <Link href="/dashboard/messaging">پیام‌ها</Link>,
-        },
-      ],
-    };
-
-    // Support & help items for all users
-    const supportItems: MenuItem[] = [
+    // Admin-specific items
+    const adminItems: MenuItem[] = [
       {
-        key: 'support-divider',
-        type: 'divider',
+        key: 'admin-management',
+        icon: <AppstoreOutlined />,
+        label: 'مدیریت سیستم',
+        children: [
+          {
+            key: '/dashboard/admin/users',
+            label: <Link href="/dashboard/admin/users">مدیریت کاربران</Link>,
+          },
+          {
+            key: '/dashboard/admin/consultants',
+            label: (
+              <Link href="/dashboard/admin/consultants">مدیریت مشاوران</Link>
+            ),
+          },
+          {
+            key: '/dashboard/admin/sessions',
+            label: <Link href="/dashboard/admin/sessions">مدیریت جلسات</Link>,
+          },
+        ],
+      },
+      {
+        key: '/dashboard/admin/reports',
+        icon: <FileTextOutlined />,
+        label: <Link href="/dashboard/admin/reports">گزارش‌ها</Link>,
+      },
+    ];
+
+    // Consultant-specific items
+    const consultantItems: MenuItem[] = [
+      {
+        key: '/dashboard/consultant',
+        icon: <DashboardOutlined />,
+        label: <Link href="/dashboard/consultant">داشبورد</Link>,
+      },
+      {
+        key: '/dashboard/consultant/availability',
+        icon: <ClockCircleOutlined />,
+        label: (
+          <Link href="/dashboard/consultant/availability">زمان‌های من</Link>
+        ),
+      },
+      {
+        key: '/dashboard/consultant/sessions',
+        icon: <CalendarOutlined />,
+        label: <Link href="/dashboard/consultant/sessions">جلسات من</Link>,
+      },
+      {
+        key: '/dashboard/consultant/reviews',
+        icon: <StarOutlined />,
+        label: <Link href="/dashboard/consultant/reviews">نظرات من</Link>,
+      },
+    ];
+
+    // Client-specific items
+    const clientItems: MenuItem[] = [
+      {
+        key: '/dashboard/client',
+        icon: <DashboardOutlined />,
+        label: <Link href="/dashboard/client">داشبورد</Link>,
+      },
+      {
+        key: '/consultants',
+        icon: <TeamOutlined />,
+        label: <Link href="/consultants">یافتن مشاور</Link>,
+      },
+      {
+        key: '/dashboard/client/sessions',
+        icon: <CalendarOutlined />,
+        label: <Link href="/dashboard/client/sessions">جلسات من</Link>,
+      },
+      {
+        key: '/dashboard/client/reviews',
+        icon: <StarOutlined />,
+        label: <Link href="/dashboard/client/reviews">نظرات من</Link>,
+      },
+    ];
+
+    // Settings & help items
+    const settingsItems: MenuItem[] = [
+      {
+        key: '/dashboard/settings',
+        icon: <SettingOutlined />,
+        label: <Link href="/dashboard/settings">تنظیمات</Link>,
       },
       {
         key: '/dashboard/help',
         icon: <QuestionCircleOutlined />,
         label: <Link href="/dashboard/help">راهنما و پشتیبانی</Link>,
       },
-      {
-        key: 'logout',
-        icon: <LogoutOutlined />,
-        label: 'خروج از حساب',
-        onClick: onLogout || (() => (window.location.href = '/auth/login')),
-      },
     ];
 
-    return [...commonItems, ...roleBasedItems[userRole], ...supportItems];
+    // Add role-specific items based on user role
+    let roleSpecificItems: MenuItem[] = [];
+    console.log('userRole :>> ', userRole);
+    if (userRole === 'admin') {
+      roleSpecificItems = adminItems;
+    } else if (userRole === 'consultant') {
+      roleSpecificItems = consultantItems;
+    } else {
+      roleSpecificItems = clientItems;
+    }
+
+    // Logout item
+    const logoutItem: MenuItem = {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'خروج از حساب',
+      onClick: onLogout || (() => (window.location.href = '/auth/login')),
+    };
+
+    return [
+      ...roleSpecificItems,
+      ...commonItems,
+      {
+        type: 'divider',
+      },
+      ...settingsItems,
+      logoutItem,
+    ];
   };
 
   // User profile section for sidebar
@@ -237,20 +232,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       className="min-h-screen bg-white shadow-sm"
       trigger={null}
     >
-      <div className="flex h-16 items-center justify-center">
-        {!collapsed ? (
-          <Link href="/" className="text-primary-500 text-lg font-bold">
-            سامانه مشاوره خانواده
-          </Link>
-        ) : (
-          <Tooltip placement="left" title="سامانه مشاوره خانواده">
-            <Link href="/" className="text-primary-500 text-xl font-bold">
-              م.خ
-            </Link>
-          </Tooltip>
-        )}
-      </div>
-
       {userProfileSection}
 
       <Menu

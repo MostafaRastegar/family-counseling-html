@@ -1,11 +1,11 @@
 export const authData = {
   currentUser: {
-    id: 'user-002',
-    email: 'consultant1@example.com',
-    fullName: 'دکتر علی محمدی',
-    role: 'consultant',
-    phoneNumber: '09123456790',
-    profileImage: '/images/avatars/consultant1.jpg',
+    id: 'user-001',
+    email: 'admin@example.com',
+    fullName: 'مدیر سیستم',
+    role: 'admin',
+    phoneNumber: '09123456789',
+    profileImage: '/images/avatars/admin.jpg',
   },
   token:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImNvbnN1bHRhbnQxQGV4YW1wbGUuY29tIiwic3ViIjoidXNlci0wMDIiLCJyb2xlIjoiY29uc3VsdGFudCIsImlhdCI6MTY4MTIzNDU2N30.sample_token',

@@ -31,13 +31,17 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   children,
-  userRole = 'client',
+  userRole,
   currentUser = null,
   pageTitle,
   loading = false,
   breadcrumbs,
   showFooter = false,
 }) => {
+  console.log('object :>> ', {
+    userRole,
+    currentUser,
+  });
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
@@ -133,7 +137,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
           <Content className="min-h-[calc(100vh-64px)]">
             {/* Breadcrumb navigation */}
-            <div className="border-b bg-white px-6 py-3">
+            {/* <div className="border-b bg-white px-6 py-3">
               <Breadcrumb
                 items={generateBreadcrumbs().map((item) => ({
                   title: item.href ? (
@@ -143,7 +147,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   ),
                 }))}
               />
-            </div>
+            </div> */}
 
             {/* Main content area */}
             <div className="p-6">

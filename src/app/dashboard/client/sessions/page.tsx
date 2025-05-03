@@ -7,7 +7,7 @@ import SessionsList from '@/components/sessions/SessionsList';
 import { SessionStatus } from '@/components/sessions/session';
 import DashboardBreadcrumb from '@/components/ui/DashboardBreadcrumb';
 import PageHeader from '@/components/ui/PageHeader';
-import { authSamples } from '@/mocks/auth';
+import { authData } from '@/mocks/auth';
 import { sessions } from '@/mocks/sessions';
 
 export default function ClientSessionsPage() {
@@ -16,7 +16,7 @@ export default function ClientSessionsPage() {
   const [userSessions, setUserSessions] = useState<any[]>([]);
 
   // Get current user
-  const currentUser = authSamples.client;
+  const currentUser = authData.currentUser;
 
   // Fetch sessions data
   useEffect(() => {
