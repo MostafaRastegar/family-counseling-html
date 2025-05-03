@@ -235,7 +235,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
 
                 return (
                   <div key={rating} className="mb-2 flex items-center">
-                    <div className="ml-2 w-16 text-left">
+                    <div className="ml-2 w-16 text-right">
                       <Button
                         type={ratingFilter === rating ? 'primary' : 'text'}
                         size="small"

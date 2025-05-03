@@ -163,7 +163,7 @@ export default function ConsultantReviewsPage() {
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
-                    <div className="mr-2 min-w-16 text-left">
+                    <div className="mr-2 min-w-16 text-right">
                       <Text>{count} نظر</Text>
                     </div>
                   </div>
